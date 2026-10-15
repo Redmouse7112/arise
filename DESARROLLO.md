@@ -22,22 +22,27 @@ js/app.js             router por hash, toasts, barra global de temporizador
 js/data.js            cinturones, imágenes, ejercicios (EX), sesiones (SESS), plan base
 js/store.js           estado en localStorage ('arise.v1'), fechas, sesión por día
 js/xp.js              XP, nivel, racha (se calcula desde el registro)
+js/habitos.js         datos de Comida y Lectura (proteína, libros, páginas, XP); sin interfaz
 js/timer.js           cuenta regresiva / cronómetro con horas absolutas
 js/ui.js              helpers de vistas
-js/views/*.js         estado, hoy, plan, ejercicio
+js/views/*.js         estado, hoy, comida, lectura, plan, ejercicio
 img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 ```
 
-## Modelo de datos (`localStorage['arise.v1']`)
+## Modelo de datos (`localStorage['arise.v1']`, esquema `v: 2`)
 - `profile {belt, since, exam}`; `plan[0..6]` (domingo=0) con id de sesión; `over[fecha]` sesión elegida para ese día.
 - `log[fecha] = { s: sesión congelada, ex: { id: { sets:[{w,r,d}], n, done, t } } }`.
 - `last[id] = {w, r}` últimos valores; `prefs[id] = {dur, rest}` tiempos editados.
+- `food {goal, kcal, quick:[{id,n,g}], log:{fecha:[{n,g,t}]}, gl:{fecha:meta}}`: `g` = gramos de proteína; `gl` congela la meta del día al cargar la primera comida.
+- `read {goal, current, books:[{id,t,a,pages,cur,done}], log:{fecha:{pages,min}}, gl:{fecha:meta}}`: `done` = fecha en que se terminó (o null); `current` = id del libro actual.
+- Migración v1 → v2 en `store.js` (`migrate`): conserva todo y agrega `food` y `read`; guarda una copia de los datos previos en `arise.v1.bak1`.
 - Cambios de esquema: subir `v` y migrar en `load()`; nunca romper datos existentes.
 
 ## Reglas de XP
 - Ejercicio hecho: `ex.xp` (25 normal, 15-40 cardio, 60 clase, 80 sparring, 40 descanso).
 - Sesión completa (todos los no opcionales): `bonus` de la sesión.
 - Nivel = floor(sqrt(xp/60)) + 1. Racha = días con sesión completa; un descanso planificado no marcado no corta la racha.
+- Comida: +30 XP por día con proteína ≥ 90 % de la meta de ese día. Lectura: +20 XP por día con páginas ≥ meta y +100 XP por libro terminado. Se calculan desde el registro (`foodXP`, `readXP`), suman a `totalXP()` pero no cuentan para la racha ni la sesión completa.
 - **Sin penalizaciones.** Descansar suma XP. El usuario tiende a comer poco: la alerta de proteína baja (V2) debe ser amable.
 
 ## Cómo extender
@@ -59,10 +64,13 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Series, repeticiones y pesos de Gym 2 (peso muerto rumano, sentadilla dividida, puente) son estimados.
 - Pesos de Gym 1 conocidos: curl 12 kg, laterales 10 kg, banca 15 kg, press militar 12 kg por lado (subir a 14 con 8 limpias), remo 16 kg (probó 21 kg), farmer's walk 12 kg por lado × 50 m. Meta general: 87 kg, abdomen marcado, ~2.600 kcal, ~180 g de proteína.
 
-**V2**
+**V2a (hecha)**
+- Comida: proteína del día contra meta (180 g), alimentos rápidos editables, aviso amable, gráfico de 7 días, XP.
+- Lectura: libros, páginas del día, estimación de días, cronómetro "Leer 20 min" (kind `read`), XP.
+- Navegación de 5 ítems; tarjetas de proteína y lectura en Estado y Misión.
+
+**V2 (falta)**
 - Trote (con intervalos), Calistenia, Dojo y diario de Sparring (qué salió bien / qué falló; rondas de 3 min con descanso de 1 min).
-- Comida: proteína del día contra meta (~180 g), alimentos rápidos, aviso amable si va baja.
-- Lectura: libro actual y páginas por día.
 - Sugerencia automática de subir peso al cumplir las repeticiones máximas en todas las series.
 - Editar series, repeticiones y descanso por ejercicio desde la app.
 
