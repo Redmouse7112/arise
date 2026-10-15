@@ -6,7 +6,7 @@ App personal de entrenamiento de Javier ("RED"), 20 años, kickboxer (cinturón 
 - Sin frameworks ni librerías externas. HTML, CSS y JS vanilla con módulos ES. Lo más liviano posible.
 - Código limpio y modular. Un archivo por responsabilidad.
 - Funciona offline: localStorage para datos, service worker para la app. IndexedDB solo para fotos (V3).
-- Se publica en GitHub Pages (subruta), así que **todas las rutas son relativas** (sin `/` inicial).
+- El sitio vive en https://redmouse7112.github.io/arise/ (subruta) y los cambios se publican con push a `main`, así que **todas las rutas son relativas** (sin `/` inicial).
 - Entregar archivos completos y listos; el usuario itera con feedback puntual y pide explicaciones solo si las necesita.
 - Los datos viven solo en el dispositivo. Nada de servidores ni cuentas.
 
