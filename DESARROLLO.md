@@ -9,6 +9,7 @@ App personal de entrenamiento de Javier ("RED"), 20 años, kickboxer (cinturón 
 - El sitio vive en https://redmouse7112.github.io/arise/ (subruta) y los cambios se publican con push a `main`, así que **todas las rutas son relativas** (sin `/` inicial).
 - Entregar archivos completos y listos; el usuario itera con feedback puntual y pide explicaciones solo si las necesita.
 - Los datos viven solo en el dispositivo. Nada de servidores ni cuentas.
+- Los commits y pull requests son solo del autor del repositorio, sin firmas ni coautores.
 
 ## Estructura
 ```
