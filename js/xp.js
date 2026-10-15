@@ -1,6 +1,7 @@
 // XP, nivel, racha. Todo se calcula desde el registro: sin duplicados ni desajustes.
 import { SESS, EX, TITLES } from './data.js';
 import { get, ymd, sessionFor } from './store.js';
+import { foodXP, readXP } from './habitos.js';
 
 export function isDone(ex, rec) {
   if (!rec) return false;
@@ -31,7 +32,7 @@ export function dayStats(date) {
 export function totalXP() {
   let t = 0;
   for (const d of Object.keys(get().log)) t += dayStats(d).xp;
-  return t;
+  return t + foodXP() + readXP();   // comida y lectura suman XP pero no cuentan para racha ni sesión completa
 }
 
 export function levelInfo(xp) {

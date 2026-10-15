@@ -2,6 +2,8 @@
 import { EX, MUS, SESS, IMG } from './data.js';
 import { get, pref } from './store.js';
 import { isDone } from './xp.js';
+import { foodDay, readDay } from './habitos.js';
+import { ymd } from './store.js';
 
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -26,3 +28,15 @@ export function exDone(id, date) {
 }
 
 export const sessEx = (sid) => SESS[sid].ex.map((id) => EX[id]);
+
+// Escapa texto escrito por el usuario antes de meterlo en HTML.
+export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// Dos tarjetas compactas (proteína y lectura de hoy) para Estado y Misión.
+export function habitCards() {
+  const d = ymd(), f = foodDay(d), r = readDay(d);
+  const card = (href, color, label, now, goal, unit, pct) => `<a class="panel sc mini" href="${href}" style="--sc:${color};--acc:${color};margin:0">
+    <div class="up">${label}</div><div class="num"><b>${now}</b><span class="mut"> / ${goal} ${unit}</span></div>
+    <div class="bar"><b style="width:${Math.min(100, pct)}%"></b></div></a>`;
+  return `<div class="grid2" style="margin-bottom:14px">${card('#/comida', '#34d399', 'Proteína de hoy', f.g, f.goal, 'g', f.pct)}${card('#/lectura', '#22d3ee', 'Lectura de hoy', r.pages, r.goal, 'págs', r.pct)}</div>`;
+}
