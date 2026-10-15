@@ -2,7 +2,7 @@
 import { SESS, IMG } from '../data.js';
 import { get, ymd, sessionFor, setSession } from '../store.js';
 import { dayStats } from '../xp.js';
-import { muscleImg, target, exDone, sessEx, CHECK } from '../ui.js';
+import { muscleImg, target, exDone, sessEx, CHECK, habitCards } from '../ui.js';
 
 export function render(root, ctx) {
   const S = get(), date = ymd(), sid = sessionFor(date), sess = SESS[sid], st = dayStats(date);
@@ -27,7 +27,9 @@ export function render(root, ctx) {
       <div class="chk">${d ? CHECK : ''}</div></a>`;
   }).join('')}</div>
 
-  <section class="panel" style="margin-top:14px">
+  <div style="margin-top:14px">${habitCards()}</div>
+
+  <section class="panel">
     <div class="up" style="margin-bottom:8px">¿Cambió el plan de hoy?</div>
     <select class="pick" id="pick">${Object.entries(SESS).map(([k, v]) => `<option value="${k}" ${k === sid ? 'selected' : ''}>${v.n}</option>`).join('')}</select>
   </section>`;

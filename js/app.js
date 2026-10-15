@@ -4,16 +4,21 @@ import { BELTS } from './data.js';
 import { totalXP, levelInfo } from './xp.js';
 import * as T from './timer.js';
 import { markDone } from './views/ejercicio.js';
+import { addMinutes } from './habitos.js';
 
 const VIEWS = {
   estado: () => import('./views/estado.js'),
   hoy: () => import('./views/hoy.js'),
+  comida: () => import('./views/comida.js'),
+  lectura: () => import('./views/lectura.js'),
   plan: () => import('./views/plan.js'),
   ej: () => import('./views/ejercicio.js'),
 };
 const ICON = {
   estado: '<svg viewBox="0 0 24 24"><path d="M12 2l8.5 5v10L12 22l-8.5-5V7z"/><path d="M12 8v5l3 2"/></svg>',
   hoy: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>',
+  comida: '<svg viewBox="0 0 24 24"><path d="M7 3v8a2 2 0 0 0 2 2v8M11 3v8a2 2 0 0 1-2 2M9 3v6"/><path d="M17 3c-2 2-3 4.500-3 7.500 0 1.500 1 2.500 3 2.500v8"/></svg>',
+  lectura: '<svg viewBox="0 0 24 24"><path d="M12 6.500C10 5 7 4.500 4 5v13c3-.5 6 0 8 1.500 2-1.500 5-2 8-1.500V5c-3-.5-6 0-8 1.500z"/><path d="M12 6.500v13"/></svg>',
   plan: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
 };
 
@@ -24,7 +29,7 @@ const tbar = document.getElementById('tbar');
 const toastEl = document.getElementById('toast');
 let cleanup = null, lastXP = totalXP(), tTimer;
 
-nav.innerHTML = [['estado', 'Estado'], ['hoy', 'Misión'], ['plan', 'Plan']]
+nav.innerHTML = [['estado', 'Estado'], ['hoy', 'Misión'], ['comida', 'Comida'], ['lectura', 'Lectura'], ['plan', 'Plan']]
   .map(([k, n]) => `<a href="#/${k}" data-k="${k}">${ICON[k]}<span>${n}</span></a>`).join('');
 
 export function toast(msg) {
@@ -39,7 +44,7 @@ function theme() {
 
 const ctx = {
   toast,
-  refresh: () => route(),
+  refresh: (keep) => route(keep),   // keep=true conserva el scroll
   // Calcula la diferencia de XP y avisa (incluye subida de nivel).
   commit() {
     const xp = totalXP(), d = xp - lastXP, a = levelInfo(lastXP).lvl, b = levelInfo(xp).lvl;
@@ -50,7 +55,7 @@ const ctx = {
   },
 };
 
-async function route() {
+async function route(keep) {
   if (cleanup) { try { cleanup(); } catch {} cleanup = null; }
   theme();
   const [, k = 'estado', arg] = location.hash.replace('#', '').split('/');
@@ -60,10 +65,10 @@ async function route() {
   const c = mod.render(root, ctx, arg);
   cleanup = typeof c === 'function' ? c : null;
   root.style.animation = 'none'; void root.offsetWidth; root.style.animation = '';
-  if (!ctx._keep) window.scrollTo(0, 0);
+  if (!keep) window.scrollTo(0, 0);
   renderBar(T.view());
 }
-window.addEventListener('hashchange', route);
+window.addEventListener('hashchange', () => route());
 
 // ---- barra global del temporizador ----
 let barSig = '';
@@ -92,6 +97,10 @@ T.sub((type, v) => {
       markDone(v.meta.date, v.meta.exId, Math.round(v.total / 1000));
       ctx.commit(); toast('¡Hecho!');
       if (location.hash.startsWith('#/ej/') || location.hash === '#/hoy') route();
+    } else if (v.meta.kind === 'read') {
+      addMinutes(v.meta.date, v.meta.min || Math.round(v.total / 60000));
+      toast(`Lectura terminada · ${v.meta.min || Math.round(v.total / 60000)} min`);
+      if (location.hash === '#/lectura') route(true);
     } else toast('Descanso terminado');
   }
   renderBar(v);

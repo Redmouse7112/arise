@@ -1,6 +1,7 @@
 // Pantalla Estado: rango (cinturón), nivel, XP, racha, semana y ajustes.
 import { BELTS, IMG, SESS } from '../data.js';
 import { get, save, ymd, dow, sessionFor, exportJSON, importJSON, reset } from '../store.js';
+import { habitCards } from '../ui.js';
 import { totalXP, levelInfo, streak, dayStats } from '../xp.js';
 
 const DL = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
@@ -45,6 +46,8 @@ export function render(root, ctx) {
     <div class="panel stat" style="margin:0"><div class="up">Racha</div><b>${streak()} <span style="font-size:.9rem">días</span></b></div>
     <div class="panel stat" style="margin:0"><div class="up">Examen de cinturón</div><b>${examTxt}</b></div>
   </div>
+
+  ${habitCards()}
 
   <section class="panel sc" style="--sc:${SESS[sid].color}">
     <div class="row"><div><div class="up">Hoy</div><div style="font-weight:700;margin-top:2px">${SESS[sid].n}</div>
