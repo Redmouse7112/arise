@@ -1,6 +1,13 @@
 // Registro de cambios para quien usa la app. La entrada más nueva va primero.
 // Regla: en cada entrega, subir APP_VERSION (data.js) y sumar acá su entrada, en lenguaje simple.
 export const NOVEDADES = [
+  { v: '2.2.0', fecha: '2026-10-16', items: [
+    'Armá tus propias rutinas: creá, duplicá y ordená ejercicios desde Más → Rutinas.',
+    'Creá tus propios ejercicios y cambiá series, repeticiones y descansos.',
+    'Editar una rutina no cambia tus puntos ni tus días anteriores.',
+    'Arise te sugiere cuándo subir el peso de un ejercicio.',
+    'Si empezás de cero, elegís una rutina de ejemplo o empezás vacío.',
+  ] },
   { v: '2.1.3', fecha: '2026-10-16', items: [
     'Ahora se instala bien en iPhone: te mostramos los pasos para agregarla al inicio.',
     'Instalada, tus datos quedan más seguros en el iPhone.',
