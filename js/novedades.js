@@ -1,6 +1,12 @@
 // Registro de cambios para quien usa la app. La entrada más nueva va primero.
 // Regla: en cada entrega, subir APP_VERSION (data.js) y sumar acá su entrada, en lenguaje simple.
 export const NOVEDADES = [
+  { v: '2.1.3', fecha: '2026-10-16', items: [
+    'Ahora se instala bien en iPhone: te mostramos los pasos para agregarla al inicio.',
+    'Instalada, tus datos quedan más seguros en el iPhone.',
+    'Mejoramos el ícono y la pantalla para que la barra de inicio del iPhone no tape los botones.',
+    'En Ajustes, un recordatorio para guardar una copia de seguridad.',
+  ] },
   { v: '2.1.2', fecha: '2026-10-16', items: [
     'La ventana de novedades ahora aparece centrada en la pantalla.',
     'Ya podés instalar Arise con un botón, desde Estado o desde Más.',
