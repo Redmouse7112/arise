@@ -1,5 +1,6 @@
 // Menú "Más": pantallas que no entran en la barra principal.
 import { APP_VERSION } from '../data.js';
+import { isInstalled, instalar } from '../instalar.js';
 
 const ITEMS = [
   ['#/plan', 'Plan semanal', 'Elegí qué sesión toca cada día'],
@@ -11,5 +12,7 @@ const ITEMS = [
 
 export function render(root) {
   root.innerHTML = `<div class="head"><h1>Más</h1><span class="up">v${APP_VERSION}</span></div>
-  ${ITEMS.map(([h, t, d]) => `<a class="ex mnu" href="${h}"><div><div class="t">${t}</div><div class="mut" style="font-size:.82rem">${d}</div></div><span class="mut" aria-hidden="true">›</span></a>`).join('')}`;
+  ${ITEMS.map(([h, t, d]) => `<a class="ex mnu" href="${h}"><div><div class="t">${t}</div><div class="mut" style="font-size:.82rem">${d}</div></div><span class="mut" aria-hidden="true">›</span></a>`).join('')}
+  ${isInstalled() ? '' : `<button class="ex mnu" id="inst" style="width:100%;text-align:left"><div><div class="t">Instalar la app</div><div class="mut" style="font-size:.82rem">Abrila como una app, sin internet</div></div><span class="mut" aria-hidden="true">›</span></button>`}`;
+  const b = root.querySelector('#inst'); if (b) b.onclick = instalar;
 }

@@ -1,6 +1,7 @@
 // Arranque, router por hash, barra de temporizador, toasts.
 import { load, get, ymd, save } from './store.js';
 import { initNovedades, hasData } from './aviso.js';
+import * as Inst from './instalar.js';
 import { BELTS } from './data.js';
 import { totalXP, levelInfo } from './xp.js';
 import * as T from './timer.js';
@@ -122,6 +123,9 @@ T.sub((type, v) => {
 });
 
 // ---- inicio ----
+Inst.init(toast);
+// Si cambia el estado de instalación, redibujo Estado o Más (sin tocar un campo que se esté escribiendo).
+Inst.onChange(() => { if (/^#\/(estado|mas)?$|^#\/(estado|mas)\//.test(location.hash || '#/estado') && !document.querySelector('#view :focus')) route(true); });
 route().then(() => {
   initNovedades(hadData);
   setTimeout(() => document.getElementById('splash').classList.add('off'), 700);

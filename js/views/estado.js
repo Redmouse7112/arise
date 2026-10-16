@@ -2,6 +2,7 @@
 import { BELTS, IMG, SESS, APP_VERSION } from '../data.js';
 import { get, save, ymd, dow, sessionFor, exportJSON, importJSON, reset } from '../store.js';
 import { habitCards } from '../ui.js';
+import { tarjetaHTML, tarjetaBind } from '../instalar.js';
 import { totalXP, levelInfo, streak, dayStats } from '../xp.js';
 
 const DL = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
@@ -57,6 +58,8 @@ export function render(root, ctx) {
 
   <section class="panel"><div class="up" style="margin-bottom:10px">Esta semana</div><div class="week">${weekStrip()}</div></section>
 
+  ${tarjetaHTML()}
+
   <section class="panel" id="ajustes">
     <div class="up" style="margin-bottom:6px">Ajustes</div>
     <table class="tbl">
@@ -73,6 +76,7 @@ export function render(root, ctx) {
     <p class="mut num" style="font-size:.78rem;margin:8px 0 0">Arise v${APP_VERSION} · <a href="#/novedades" style="text-decoration:underline">Novedades</a></p>
   </section>`;
 
+  tarjetaBind(root);
   const on = (id, ev, f) => root.querySelector(id).addEventListener(ev, f);
   on('#belt', 'change', (e) => { S.profile.belt = e.target.value; save(); ctx.refresh(); });
   on('#since', 'change', (e) => { S.profile.since = e.target.value; save(); });
