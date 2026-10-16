@@ -3,7 +3,8 @@ import { APP_VERSION } from '../data.js';
 import { isInstalled, instalar } from '../instalar.js';
 
 const ITEMS = [
-  ['#/plan', 'Plan semanal', 'Elegí qué sesión toca cada día'],
+  ['#/plan', 'Plan semanal', 'Elegí qué rutina toca cada día'],
+  ['#/rutinas', 'Rutinas', 'Armá tus rutinas y ejercicios'],
   ['#/sparring', 'Diario de sparring', 'Qué salió bien, qué falló y qué trabajar'],
   ['#/trote', 'Historial de trote', 'Tus trotes con tiempo, distancia y sensación'],
   ['#/estado/ajustes', 'Ajustes', 'Cinturón, examen y copia de seguridad'],
