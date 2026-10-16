@@ -22,11 +22,15 @@ if (t && t.mode === 'phases') {
 
 const persist = () => { try { t ? localStorage.setItem(K, JSON.stringify(t)) : localStorage.removeItem(K); } catch {} };
 
+// iOS no tiene navigator.vibrate: el aviso se apoya en el sonido y en la barra que parpadea.
+const vibrar = (p) => { try { if ('vibrate' in navigator) navigator.vibrate(p); } catch {} };
+
 export function unlockAudio() {
   try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); ctx.resume && ctx.resume(); } catch {}
 }
 function blip(n = 1) {
   if (!ctx) return;
+  try { ctx.resume && ctx.resume(); } catch {}   // iOS suspende el audio al pasar a segundo plano
   for (let i = 0; i < n; i++) {
     const o = ctx.createOscillator(), g = ctx.createGain(), s = ctx.currentTime + i * 0.18;
     o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
@@ -36,6 +40,7 @@ function blip(n = 1) {
 }
 function beep() {
   if (!ctx) return;
+  try { ctx.resume && ctx.resume(); } catch {}
   [0, 0.25, 0.5].forEach((d, i) => {
     const o = ctx.createOscillator(), g = ctx.createGain(), s = ctx.currentTime + d;
     o.frequency.value = i === 2 ? 1040 : 780; o.connect(g); g.connect(ctx.destination);
@@ -65,16 +70,16 @@ function tick() {
   const v = view();
   if (v && v.mode === 'down' && v.done && !t.fired) {
     t.fired = true; persist(); lockOff(); beep();
-    try { navigator.vibrate && navigator.vibrate([250, 120, 250, 120, 500]); } catch {}
+    vibrar([250, 120, 250, 120, 500]);
     subs.forEach((f) => f('done', v));
   }
   if (v && v.mode === 'phases') {
     if (v.done && !t.fired) {
       t.fired = true; persist(); lockOff(); beep();
-      try { navigator.vibrate && navigator.vibrate([250, 120, 250, 120, 500]); } catch {}
+      vibrar([250, 120, 250, 120, 500]);
       subs.forEach((f) => f('done', v));
     } else if (!v.done && v.running) {
-      if (t.li !== v.idx) { t.li = v.idx; persist(); blip(); try { navigator.vibrate && navigator.vibrate(150); } catch {} }
+      if (t.li !== v.idx) { t.li = v.idx; persist(); blip(); vibrar(150); }
       if (v.phase.warn && v.left <= v.phase.warn && t.lw !== v.idx) { t.lw = v.idx; persist(); blip(2); }
     }
   }
