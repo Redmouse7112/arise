@@ -23,19 +23,24 @@ js/data.js            cinturones, imágenes, ejercicios (EX), sesiones (SESS), p
 js/store.js           estado en localStorage ('arise.v1'), fechas, sesión por día
 js/xp.js              XP, nivel, racha (se calcula desde el registro)
 js/habitos.js         datos de Comida y Lectura (proteína, libros, páginas, XP); sin interfaz
+js/entreno.js         datos de trote, dojo y diario de sparring; sin interfaz
+js/novedades.js       registro de cambios para el usuario (NOVEDADES); js/aviso.js: ventana de novedades
 js/timer.js           cuenta regresiva / cronómetro con horas absolutas
 js/ui.js              helpers de vistas
-js/views/*.js         estado, hoy, comida, lectura, plan, ejercicio
+js/views/*.js         estado, hoy, comida, lectura, mas, plan, ejercicio, novedades,
+                      historial (trote), diario (sparring); pantallas propias de ejercicio: trote, clase, spar
 img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 ```
 
-## Modelo de datos (`localStorage['arise.v1']`, esquema `v: 2`)
+## Modelo de datos (`localStorage['arise.v1']`, esquema `v: 3`)
 - `profile {belt, since, exam}`; `plan[0..6]` (domingo=0) con id de sesión; `over[fecha]` sesión elegida para ese día.
 - `log[fecha] = { s: sesión congelada, ex: { id: { sets:[{w,r,d}], n, done, t } } }`.
 - `last[id] = {w, r}` últimos valores; `prefs[id] = {dur, rest}` tiempos editados.
 - `food {goal, kcal, quick:[{id,n,g}], log:{fecha:[{n,g,t}]}, gl:{fecha:meta}}`: `g` = gramos de proteína; `gl` congela la meta del día al cargar la primera comida.
 - `read {goal, current, books:[{id,t,a,pages,cur,done}], log:{fecha:{pages,min}}, gl:{fecha:meta}}`: `done` = fecha en que se terminó (o null); `current` = id del libro actual.
-- Migración v1 → v2 en `store.js` (`migrate`): conserva todo y agrega `food` y `read`; guarda una copia de los datos previos en `arise.v1.bak1`.
+- `run {log:{fecha:{mode:'cont'|'int', min, km, feel}}}`; `dojo {log:{fecha:{type, effort, notes}}}`; `spar {log:[{id, date, rounds, feel, good, bad, work}]}`.
+- Migración en `store.js` (`migrate`): conserva todo y agrega lo que falte; antes de migrar guarda una copia de los datos previos en `arise.v1.bak<versión>` (`bak1`, `bak2`).
+- Aparte del estado principal: `arise.seen` (última versión de novedades vista) y `arise.timer` (temporizador activo).
 - Cambios de esquema: subir `v` y migrar en `load()`; nunca romper datos existentes.
 
 ## Reglas de XP
@@ -43,6 +48,7 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Sesión completa (todos los no opcionales): `bonus` de la sesión.
 - Nivel = floor(sqrt(xp/60)) + 1. Racha = días con sesión completa; un descanso planificado no marcado no corta la racha.
 - Comida: +30 XP por día con proteína ≥ 90 % de la meta de ese día. Lectura: +20 XP por día con páginas ≥ meta y +100 XP por libro terminado. Se calculan desde el registro (`foodXP`, `readXP`), suman a `totalXP()` pero no cuentan para la racha ni la sesión completa.
+- Trote: además de `ex.xp` (40), +1 XP por cada 2 min por encima de 20, tope +20 (`runBonus`). Solo cuenta si la sesión del día incluye el trote.
 - **Sin penalizaciones.** Descansar suma XP. El usuario tiende a comer poco: la alerta de proteína baja (V2) debe ser amable.
 
 ## Cómo extender
@@ -51,6 +57,9 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Nueva pantalla: crear `js/views/x.js` con `render(root, ctx, arg)` (puede devolver una función de limpieza), registrarla en `VIEWS` y en `nav` de `app.js`.
 - `ctx.commit()` después de cambiar progreso (calcula y muestra +XP / subida de nivel). `ctx.refresh()` re-renderiza.
 - Al agregar archivos nuevos, sumarlos a `CORE` en `sw.js` y subir `V`.
+- Ejercicio con pantalla propia: crear `js/views/x.js` y registrarlo en `SPECIAL` de `app.js` (clave = id del ejercicio).
+- Temporizador por fases: `T.startPhases([{label, ms, round?, rounds?, warn?}], meta)`. `meta.kind` ('ex', 'read', 'run', 'spar') decide qué hace `app.js` al terminar; `meta.exId` oculta la barra global en esa pantalla.
+- **Regla permanente:** en cada entrega, subir `APP_VERSION` (`js/data.js`) y agregar su entrada arriba en `js/novedades.js`, escrita para el usuario final (3 a 5 viñetas, lenguaje simple). La ventana aparece una sola vez por versión.
 
 ## Estado de imágenes
 - Emblemas de sección y músculos de Dorsales, Hombros, Deltoide posterior, Pecho y Bíceps: **hechos con Gemini/ChatGPT** (calidad final).
@@ -69,10 +78,17 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Lectura: libros, páginas del día, estimación de días, cronómetro "Leer 20 min" (kind `read`), XP.
 - Navegación de 5 ítems; tarjetas de proteína y lectura en Estado y Misión.
 
-**V2 (falta)**
-- Trote (con intervalos), Calistenia, Dojo y diario de Sparring (qué salió bien / qué falló; rondas de 3 min con descanso de 1 min).
+**V2b (hecha, v2.1.0)**
+- Trote continuo e intervalos (1:1×10, 2:1×8, 3:1×6, personalizado) con registro de km y sensación; historial.
+- Sesión Calistenia (elegible en Plan y Misión; no está en el plan base). Plancha es `timed` con `step` de 15 s.
+- Clase en Spartans con tipo, esfuerzo y notas; asistencias de semana y mes.
+- Sparring: rondas 3 min + 1 min de descanso con aviso a los 10 s; diario editable; "A trabajar" arriba en Misión el día de sparring.
+- Barra de 5 ítems (Estado, Misión, Comida, Lectura, Más); `#/mas` lleva a Plan, Diario, Historial de trote, Ajustes y Novedades.
+- Ventana de novedades y versión de la app (Estado → Ajustes).
+
+**V2c (falta)**
+- Editar series, repeticiones y descanso por ejercicio desde la app (incluye la calistenia).
 - Sugerencia automática de subir peso al cumplir las repeticiones máximas en todas las series.
-- Editar series, repeticiones y descanso por ejercicio desde la app.
 
 **V3**
 - Cuerpo: peso, medidas y fotos de progreso (IndexedDB) con gráficos simples.
