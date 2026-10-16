@@ -25,6 +25,8 @@ js/xp.js              XP, nivel, racha (se calcula desde el registro)
 js/habitos.js         datos de Comida y Lectura (proteína, libros, páginas, XP); sin interfaz
 js/entreno.js         datos de trote, dojo y diario de sparring; sin interfaz
 js/novedades.js       registro de cambios para el usuario (NOVEDADES); js/aviso.js: ventana de novedades
+js/modal.js           ventana pequeña centrada reutilizable (`abrirModal`)
+js/instalar.js        botón de instalación (beforeinstallprompt) y ayuda por navegador
 js/timer.js           cuenta regresiva / cronómetro con horas absolutas
 js/ui.js              helpers de vistas
 js/views/*.js         estado, hoy, comida, lectura, mas, plan, ejercicio, novedades,
@@ -57,6 +59,7 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Nueva pantalla: crear `js/views/x.js` con `render(root, ctx, arg)` (puede devolver una función de limpieza), registrarla en `VIEWS` y en `nav` de `app.js`.
 - `ctx.commit()` después de cambiar progreso (calcula y muestra +XP / subida de nivel). `ctx.refresh()` re-renderiza.
 - Al agregar archivos nuevos, sumarlos a `CORE` en `sw.js` y subir `V`.
+- Instalación: `instalar.js` guarda el evento `beforeinstallprompt`; la tarjeta de Estado se puede descartar (`arise.instalar`) y la entrada de Más queda. Todo se oculta si la app ya corre instalada (`display-mode: standalone`). Sin el evento (iOS, Firefox, otros) muestra instrucciones según el navegador detectado; solo incluir pasos que existan de verdad.
 - Ejercicio con pantalla propia: crear `js/views/x.js` y registrarlo en `SPECIAL` de `app.js` (clave = id del ejercicio).
 - Temporizador por fases: `T.startPhases([{label, ms, round?, rounds?, warn?}], meta)`. `meta.kind` ('ex', 'read', 'run', 'spar') decide qué hace `app.js` al terminar; `meta.exId` oculta la barra global en esa pantalla.
 - **Regla permanente:** en cada entrega, subir `APP_VERSION` según la sección "Versionado" y agregar su entrada arriba en `js/novedades.js`, escrita para el usuario final (3 a 5 viñetas, lenguaje simple). La ventana aparece una sola vez por versión. Lógica en `js/aviso.js`: instalación nueva = sin registros ni copias `arise.v1.bak*` (no se muestra); con datos y sin `arise.seen` cuenta como `0.0.0` (se muestra); las versiones se comparan como números (`cmpVer`). Más → Novedades permite volver a ver la última.
