@@ -26,7 +26,7 @@ js/habitos.js         datos de Comida y Lectura (proteína, libros, páginas, XP
 js/entreno.js         datos de trote, dojo y diario de sparring; sin interfaz
 js/novedades.js       registro de cambios para el usuario (NOVEDADES); js/aviso.js: ventana de novedades
 js/modal.js           ventana pequeña centrada reutilizable (`abrirModal`)
-js/instalar.js        botón de instalación (beforeinstallprompt) y ayuda por navegador
+js/instalar.js        botón de instalación (beforeinstallprompt), pasos para iOS y ayuda por navegador
 js/timer.js           cuenta regresiva / cronómetro con horas absolutas
 js/ui.js              helpers de vistas
 js/views/*.js         estado, hoy, comida, lectura, mas, plan, ejercicio, novedades,
@@ -60,6 +60,7 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - `ctx.commit()` después de cambiar progreso (calcula y muestra +XP / subida de nivel). `ctx.refresh()` re-renderiza.
 - Al agregar archivos nuevos, sumarlos a `CORE` en `sw.js` y subir `V`.
 - Instalación: `instalar.js` guarda el evento `beforeinstallprompt`; la tarjeta de Estado se puede descartar (`arise.instalar`) y la entrada de Más queda. Todo se oculta si la app ya corre instalada (`display-mode: standalone`). Sin el evento (iOS, Firefox, otros) muestra instrucciones según el navegador detectado; solo incluir pasos que existan de verdad.
+- iOS (iPhone/iPad, PWA desde iOS 16.4): no hay `beforeinstallprompt`; `instalar.js` detecta iOS (también iPadOS como Mac táctil) y muestra los pasos de Safari (Compartir → Agregar a inicio) o pide abrir en Safari si es otro navegador. Metadatos `apple-*` e ícono 180×180 sin transparencia (`icons/apple-touch-icon.png`) en `index.html`. `navigator.vibrate` no existe en iOS: el fin de temporizador debe apoyarse en sonido y efecto visual, y ningún texto promete vibración. El sonido (Web Audio) puede quedar silenciado por el interruptor de silencio del iPhone. Al iniciar se pide `navigator.storage.persist()`. Los campos de texto usan 16 px en iOS para evitar el zoom al enfocar. No hay pruebas automáticas en WebKit/iPhone: probar a mano en un dispositivo real.
 - Ejercicio con pantalla propia: crear `js/views/x.js` y registrarlo en `SPECIAL` de `app.js` (clave = id del ejercicio).
 - Temporizador por fases: `T.startPhases([{label, ms, round?, rounds?, warn?}], meta)`. `meta.kind` ('ex', 'read', 'run', 'spar') decide qué hace `app.js` al terminar; `meta.exId` oculta la barra global en esa pantalla.
 - **Regla permanente:** en cada entrega, subir `APP_VERSION` según la sección "Versionado" y agregar su entrada arriba en `js/novedades.js`, escrita para el usuario final (3 a 5 viñetas, lenguaje simple). La ventana aparece una sola vez por versión. Lógica en `js/aviso.js`: instalación nueva = sin registros ni copias `arise.v1.bak*` (no se muestra); con datos y sin `arise.seen` cuenta como `0.0.0` (se muestra); las versiones se comparan como números (`cmpVer`). Más → Novedades permite volver a ver la última.
@@ -116,7 +117,7 @@ En cada entrega: subir `APP_VERSION` según esta regla y agregar su entrada arri
 - Cuerpo: peso, medidas y fotos de progreso (IndexedDB) con gráficos simples.
 - Atributos de peleador: Pegada, Guardia, Movilidad, Recuperación (derivados del registro).
 - Rangos de cinturón con hitos y examen; historial y calendario.
-- Mejorar el aviso de fin de temporizador (limitado: con el celular bloqueado, sonido y vibración pueden no funcionar en una web app sin servidor).
+- Mejorar el aviso de fin de temporizador (limitado: con el celular bloqueado, el sonido puede no funcionar en una web app sin servidor, y iOS no tiene vibración).
 
 ## Pruebas
 - Servir con `python3 -m http.server` y probar en viewport móvil (390×844) y escritorio. Revisar consola sin errores, offline (service worker) y persistencia al recargar.
