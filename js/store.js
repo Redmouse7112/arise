@@ -4,7 +4,7 @@ import { DEFAULT_PLAN, SEED_LAST } from './data.js';
 const KEY = 'arise.v1';
 let S;
 
-export const SCHEMA = 2;
+export const SCHEMA = 3;
 
 // Alimentos rápidos por defecto: g = gramos de proteína aproximados por porción.
 const QUICK = [
@@ -23,6 +23,9 @@ const defaults = () => ({
   prefs: {},           // id ejercicio -> { dur, rest }
   food: { goal: 180, kcal: 2600, quick: QUICK.map((q) => ({ ...q })), log: {}, gl: {} },   // log: fecha -> [{n, g, t}]; gl: meta congelada por día
   read: { goal: 10, current: null, books: [], log: {}, gl: {} },  // books: {id, t, a, pages, cur, done}; log: fecha -> {pages, min}
+  run: { log: {} },    // fecha -> { mode, min, km, feel }
+  dojo: { log: {} },   // fecha -> { type, effort, notes }
+  spar: { log: [] },   // [ { id, date, rounds, feel, good, bad, work } ]
 });
 
 // Lleva datos de cualquier versión anterior al esquema actual sin borrar nada.
@@ -33,6 +36,9 @@ function migrate(o) {
     profile: { ...d.profile, ...o.profile },
     food: { ...d.food, ...o.food, log: { ...(o.food && o.food.log) }, gl: { ...(o.food && o.food.gl) } },
     read: { ...d.read, ...o.read, books: [...((o.read && o.read.books) || [])], log: { ...(o.read && o.read.log) }, gl: { ...(o.read && o.read.gl) } },
+    run: { log: { ...(o.run && o.run.log) } },
+    dojo: { log: { ...(o.dojo && o.dojo.log) } },
+    spar: { log: [...((o.spar && o.spar.log) || [])] },
   };
 }
 
