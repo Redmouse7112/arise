@@ -1,6 +1,5 @@
 // Ejercicio "Trote": continuo o por intervalos, con registro de distancia y sensación.
-import { EX } from '../data.js';
-import { get, save, ymd, entry } from '../store.js';
+import { get, save, ymd, entry, exFor } from '../store.js';
 import { saveRun, runDay, runBonus } from '../entreno.js';
 import * as T from '../timer.js';
 import { exHead, exNav, ringHTML, ringSet, feelHTML, feelBind, durTxt } from '../ui.js';
@@ -12,7 +11,7 @@ const ID = 'trote';
 const isRun = (v) => !!(v && v.meta && v.meta.kind === 'run');
 
 export function render(root, ctx) {
-  const S = get(), date = ymd(), ex = EX[ID], rec = S.log[date] && S.log[date].ex[ID];
+  const S = get(), date = ymd(), ex = exFor(date, ID), rec = S.log[date] && S.log[date].ex[ID];
   const cfg = () => ({ mode: 'cont', dur: ex.dur, preset: '1:1', custom: { run: 2, walk: 1, rounds: 6 }, ...(S.prefs[ID] || {}) });
   const setCfg = (p) => { S.prefs[ID] = { ...cfg(), ...p }; save(); };
   let finishing = false, manual = false, feel = 3, lastSig = '';

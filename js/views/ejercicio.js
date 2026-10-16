@@ -1,8 +1,8 @@
 // Detalle de ejercicio: imagen del músculo, series, temporizador y cronómetro.
-import { EX, MUS, SESS } from '../data.js';
-import { get, save, ymd, sessionFor, entry, pref } from '../store.js';
+import { MUS } from '../data.js';
+import { get, save, ymd, entry, pref, exFor, sesionDia, sugerenciaPeso } from '../store.js';
 import * as T from '../timer.js';
-import { muscleImg, target, durTxt, CHECK } from '../ui.js';
+import { muscleImg, target, durTxt, esc, CHECK } from '../ui.js';
 
 const topReps = (r) => parseInt(String(r).split('-').pop(), 10) || '';
 const C = 2 * Math.PI * 100;
@@ -14,16 +14,16 @@ export function markDone(date, id, secs) {
 }
 
 export function render(root, ctx, id) {
-  const ex = EX[id];
+  const date = ymd(), ex = exFor(date, id);
   if (!ex) { location.hash = '#/hoy'; return; }
-  const S = get(), date = ymd(), ids = SESS[sessionFor(date)].ex, idx = ids.indexOf(id);
+  const S = get(), ids = ((sesionDia(date) || {}).ex || []).map((e) => e.id), idx = ids.indexOf(id);
   const prev = ids[idx - 1], next = ids[idx + 1];
   const rec = S.log[date] && S.log[date].ex[id];
   const P = pref(id, { dur: ex.dur, rest: ex.rest });
   const last = S.last[id];
   const mus = MUS[ex.muscle] || MUS.cardio;
-  let off = null;
-  const STEP = ex.step || 60;
+  let off = null, sug = null;
+  const STEP = ex.step || (ex.dur < 120 ? 15 : 60);
 
   let body = '';
   if (ex.type === 'sets') {
@@ -39,8 +39,14 @@ export function render(root, ctx, id) {
         <td><input inputmode="numeric" data-k="r" value="${r}" aria-label="${ex.rl === 'm' ? 'Metros' : 'Repeticiones'} serie ${i + 1}"></td>
         <td><button class="chk ${d ? 'on' : ''}" data-chk aria-label="Serie ${i + 1} hecha">${d ? CHECK : ''}</button></td></tr>`;
     }
+    sug = sugerenciaPeso(id, date);
+    const kg = (x) => String(x).replace('.', ',');
+    const aplicado = sug && [...Array(n).keys()].every((i) => { const s = rec && rec.sets && rec.sets[i]; return s && parseFloat(String(s.w).replace(',', '.')) >= sug.w; });
+    const sugHTML = !sug || aplicado ? '' : `<div class="sug"><div><b>Subí a ${kg(sug.w)} kg</b>
+      <div class="mut" style="font-size:.82rem">El ${new Date(sug.fecha + 'T12:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })} completaste todas las series con ${sug.reps} reps (${kg(sug.desde)} kg).</div></div>
+      <button class="btn sm pri" id="sugOk">Aplicar</button></div>`;
     body = `
-    <section class="panel sc">
+    <section class="panel sc">${sugHTML}
       <table class="sets"><thead><tr><th>Serie</th><th>Peso (kg)</th><th>${ex.rl === 'm' ? 'Metros' : 'Reps'}</th><th>Hecha</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="btns" style="margin-top:12px">
         <button class="btn sm" id="addset">+ Serie</button>${n > 1 ? '<button class="btn sm ghost" id="delset">− Serie</button>' : ''}
@@ -57,7 +63,7 @@ export function render(root, ctx, id) {
     body = `
     <section class="panel sc">
       <div class="ring"><svg viewBox="0 0 220 220"><circle class="bg" cx="110" cy="110" r="100"/><circle class="fg" id="rf" cx="110" cy="110" r="100" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg>
-        <div class="tm"><b id="rt">--:--</b><span class="up" id="rs">${ex.n}</span></div></div>
+        <div class="tm"><b id="rt">--:--</b><span class="up" id="rs">${esc(ex.n)}</span></div></div>
       <div class="stepper" id="dur"><button class="btn sm" data-dur="-${STEP}">−${STEP === 60 ? '1 min' : STEP + ' s'}</button><b class="num" id="durv">${durTxt(P.dur)}</b><button class="btn sm" data-dur="${STEP}">+${STEP === 60 ? '1 min' : STEP + ' s'}</button></div>
       <div class="btns" id="tb"></div>
     </section>`;
@@ -67,12 +73,12 @@ export function render(root, ctx, id) {
   }
 
   root.innerHTML = `
-  <div class="head"><div><a class="up" href="#/hoy">← Misión</a><h1 style="margin-top:6px;font-size:1.15rem">${ex.n}</h1></div>
+  <div class="head"><div><a class="up" href="#/hoy">← Misión</a><h1 style="margin-top:6px;font-size:1.15rem">${esc(ex.n)}</h1></div>
     <span class="chip num">${target(ex)}</span></div>
   <div class="mus">${muscleImg(ex.muscle)}<span>${mus[0]}</span></div>
   ${body}
-  ${ex.note || ex.prog ? `<div class="note">${[ex.note, ex.prog].filter(Boolean).join('<br>')}</div>` : ''}
-  <div class="nav2" style="margin-top:14px">${prev ? `<a class="btn sm" href="#/ej/${prev}">← ${EX[prev].n}</a>` : '<span></span>'}${next ? `<a class="btn sm" href="#/ej/${next}">${EX[next].n} →</a>` : '<span></span>'}</div>`;
+  ${ex.note || ex.prog ? `<div class="note">${[ex.note, ex.prog].filter(Boolean).map(esc).join('<br>')}</div>` : ''}
+  <div class="nav2" style="margin-top:14px">${prev ? `<a class="btn sm" href="#/ej/${prev}">← ${esc(exFor(date, prev).n)}</a>` : '<span></span>'}${next ? `<a class="btn sm" href="#/ej/${next}">${esc(exFor(date, next).n)} →</a>` : '<span></span>'}</div>`;
 
   const q = (s) => root.querySelector(s);
 
@@ -96,6 +102,12 @@ export function render(root, ctx, id) {
         }
         save(); ctx.commit(); ctx.refresh();
       });
+    });
+    const so = q('#sugOk');
+    if (so) so.addEventListener('click', () => {   // precarga el peso sugerido en las series de hoy que no están hechas
+      const r = ensure(), n = r.n || ex.sets;
+      for (let i = 0; i < n; i++) { const s = r.sets[i] || {}; if (!s.d) r.sets[i] = { ...s, w: String(sug.w) }; }
+      save(); ctx.refresh(true);
     });
     q('#addset').addEventListener('click', () => { const r = ensure(); r.n = (r.n || ex.sets) + 1; save(); ctx.refresh(); });
     const del = q('#delset');

@@ -1,6 +1,5 @@
 // Ejercicio "Clase en Spartans": tipo de clase, esfuerzo y notas.
-import { EX } from '../data.js';
-import { get, ymd, entry, save } from '../store.js';
+import { get, ymd, entry, save, exFor } from '../store.js';
 import { DOJO_TYPES, dojoDay, saveDojo, delDojo, attendance } from '../entreno.js';
 import { exHead, exNav, feelHTML, feelBind, esc } from '../ui.js';
 import { markDone } from './ejercicio.js';
@@ -8,7 +7,7 @@ import { markDone } from './ejercicio.js';
 const ID = 'clase';
 
 export function render(root, ctx) {
-  const S = get(), date = ymd(), ex = EX[ID];
+  const S = get(), date = ymd(), ex = exFor(date, ID);
   const done = !!(S.log[date] && S.log[date].ex[ID] && S.log[date].ex[ID].done);
   const saved = dojoDay(date);
   let type = (saved && saved.type) || DOJO_TYPES[0], effort = (saved && saved.effort) || 3, editing = !done;

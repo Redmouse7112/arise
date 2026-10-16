@@ -1,6 +1,6 @@
 // Utilidades de interfaz compartidas por las vistas.
-import { EX, MUS, SESS, IMG } from './data.js';
-import { get, pref, sessionFor } from './store.js';
+import { MUS, IMG } from './data.js';
+import { get, pref, sesionDia, exFor } from './store.js';
 import { isDone } from './xp.js';
 import { foodDay, readDay } from './habitos.js';
 import { ymd } from './store.js';
@@ -26,10 +26,8 @@ export function target(ex) {
 
 export function exDone(id, date) {
   const L = get().log[date];
-  return isDone(EX[id], L && L.ex[id]);
+  return isDone(exFor(date, id), L && L.ex[id]);
 }
-
-export const sessEx = (sid) => SESS[sid].ex.map((id) => EX[id]);
 
 // Escapa texto escrito por el usuario antes de meterlo en HTML.
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -46,13 +44,13 @@ export function habitCards() {
 // ---- piezas compartidas por las vistas de ejercicio especiales (trote, clase, sparring) ----
 export function exHead(ex, extra = '') {
   const mus = MUS[ex.muscle] || MUS.cardio;
-  return `<div class="head"><div><a class="up" href="#/hoy">← Misión</a><h1 style="margin-top:6px;font-size:1.15rem">${ex.n}</h1></div>${extra}</div>
+  return `<div class="head"><div><a class="up" href="#/hoy">← Misión</a><h1 style="margin-top:6px;font-size:1.15rem">${esc(ex.n)}</h1></div>${extra}</div>
   <div class="mus">${muscleImg(ex.muscle)}<span>${mus[0]}</span></div>`;
 }
 export function exNav(id, date) {
-  const ids = SESS[sessionFor(date)].ex, i = ids.indexOf(id), prev = ids[i - 1], next = ids[i + 1];
+  const ids = ((sesionDia(date) || {}).ex || []).map((e) => e.id), i = ids.indexOf(id), prev = ids[i - 1], next = ids[i + 1];
   if (i < 0) return '';
-  return `<div class="nav2" style="margin-top:14px">${prev ? `<a class="btn sm" href="#/ej/${prev}">← ${EX[prev].n}</a>` : '<span></span>'}${next ? `<a class="btn sm" href="#/ej/${next}">${EX[next].n} →</a>` : '<span></span>'}</div>`;
+  return `<div class="nav2" style="margin-top:14px">${prev ? `<a class="btn sm" href="#/ej/${prev}">← ${esc(exFor(date, prev).n)}</a>` : '<span></span>'}${next ? `<a class="btn sm" href="#/ej/${next}">${esc(exFor(date, next).n)} →</a>` : '<span></span>'}</div>`;
 }
 const RC = 2 * Math.PI * 100;
 export const ringHTML = (label = '') => `<div class="ring"><svg viewBox="0 0 220 220"><circle class="bg" cx="110" cy="110" r="100"/><circle class="fg" id="rf" cx="110" cy="110" r="100" stroke-dasharray="${RC}" stroke-dashoffset="${RC}"/></svg>

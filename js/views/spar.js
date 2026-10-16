@@ -1,6 +1,5 @@
 // Ejercicio "Sparring": rondas de 3 min con descanso de 1 min y diario al terminar.
-import { EX } from '../data.js';
-import { get, save, ymd } from '../store.js';
+import { get, save, ymd, exFor } from '../store.js';
 import { addSpar, lastWork } from '../entreno.js';
 import * as T from '../timer.js';
 import { exHead, exNav, ringHTML, ringSet, feelBind, esc } from '../ui.js';
@@ -11,7 +10,7 @@ const ID = 'spar', ROUND = 180000, REST = 60000;
 const isSp = (v) => !!(v && v.meta && v.meta.kind === 'spar');
 
 export function render(root, ctx) {
-  const S = get(), date = ymd(), ex = EX[ID];
+  const S = get(), date = ymd(), ex = exFor(date, ID);
   const done = !!(S.log[date] && S.log[date].ex[ID] && S.log[date].ex[ID].done);
   const rounds = () => Math.max(1, Math.min(30, (S.prefs[ID] && S.prefs[ID].rounds) || 3));
   let finishing = false, feel = 3, fr = 3, lastSig = '';

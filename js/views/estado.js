@@ -1,7 +1,7 @@
 // Pantalla Estado: rango (cinturón), nivel, XP, racha, semana y ajustes.
-import { BELTS, IMG, SESS, APP_VERSION } from '../data.js';
-import { get, save, ymd, dow, sessionFor, exportJSON, importJSON, reset } from '../store.js';
-import { habitCards } from '../ui.js';
+import { BELTS, IMG, APP_VERSION } from '../data.js';
+import { get, save, ymd, dow, sesionDia, exportJSON, importJSON, reset } from '../store.js';
+import { habitCards, esc } from '../ui.js';
 import { tarjetaHTML, tarjetaBind, esIOS } from '../instalar.js';
 import { totalXP, levelInfo, streak, dayStats } from '../xp.js';
 
@@ -23,7 +23,7 @@ function weekStrip() {
 export function render(root, ctx) {
   const S = get(), xp = totalXP(), L = levelInfo(xp);
   const belt = BELTS.find((b) => b.id === S.profile.belt) || BELTS[1];
-  const today = ymd(), st = dayStats(today), sid = sessionFor(today);
+  const today = ymd(), st = dayStats(today), ses = sesionDia(today);
   const days = Math.ceil((new Date(S.profile.exam + 'T12:00') - new Date()) / 864e5);
   const examTxt = days > 0 ? `${days} días` : days === 0 ? 'Hoy' : 'Pasó';
 
@@ -50,11 +50,12 @@ export function render(root, ctx) {
 
   ${habitCards()}
 
-  <section class="panel sc" style="--sc:${SESS[sid].color}">
-    <div class="row"><div><div class="up">Hoy</div><div style="font-weight:700;margin-top:2px">${SESS[sid].n}</div>
-      <div class="mut" style="font-size:.85rem">${st.done}/${st.total || SESS[sid].ex.filter((e) => true).length} ejercicios · +${st.xp} XP</div></div>
+  ${ses ? `<section class="panel sc" style="--sc:${ses.color}">
+    <div class="row"><div><div class="up">Hoy</div><div style="font-weight:700;margin-top:2px">${esc(ses.n)}</div>
+      <div class="mut" style="font-size:.85rem">${st.done}/${st.total || ses.ex.filter((e) => !e.opt).length} ejercicios · +${st.xp} XP</div></div>
       <span class="sp"></span><a class="btn pri" href="#/hoy">${st.complete ? 'Ver' : 'Ir a la misión'}</a></div>
-  </section>
+  </section>` : `<section class="panel"><div class="row"><div><div class="up">Hoy</div><div style="font-weight:700;margin-top:2px">Sin rutina</div></div>
+      <span class="sp"></span><a class="btn pri" href="#/hoy">Elegir</a></div></section>`}
 
   <section class="panel"><div class="up" style="margin-bottom:10px">Esta semana</div><div class="week">${weekStrip()}</div></section>
 
