@@ -19,8 +19,9 @@ sw.js                 caché; subir la versión V al cambiar archivos
 css/base.css          variables, fondo, layout, nav
 css/ui.css            componentes (panel, botones, series, anillo, barra)
 js/app.js             router por hash, toasts, barra global de temporizador
-js/data.js            cinturones, imágenes, ejercicios (EX), sesiones (SESS), plan base
-js/store.js           estado en localStorage ('arise.v1'), fechas, sesión por día
+js/data.js            cinturones, imágenes, ejercicios base (EX), sesiones de ejemplo (SESS), plan de ejemplo
+js/store.js           estado en localStorage ('arise.v1'), migraciones, fechas, registro del día
+js/rutinas.js         rutinas, ejercicios editables, congelado por día y sugerencia de peso (funciones puras sobre S)
 js/xp.js              XP, nivel, racha (se calcula desde el registro)
 js/habitos.js         datos de Comida y Lectura (proteína, libros, páginas, XP); sin interfaz
 js/entreno.js         datos de trote, dojo y diario de sparring; sin interfaz
@@ -35,14 +36,18 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 ```
 
 ## Modelo de datos (`localStorage['arise.v1']`, esquema `v: 3`)
-- `profile {belt, since, exam}`; `plan[0..6]` (domingo=0) con id de sesión; `over[fecha]` sesión elegida para ese día.
-- `log[fecha] = { s: sesión congelada, ex: { id: { sets:[{w,r,d}], n, done, t } } }`.
+- `profile {belt, since, exam}`; `plan[0..6]` (domingo=0) con id de rutina (`''` = sin rutina); `over[fecha]` rutina elegida para ese día.
+- `routines [{id, n, color, img, bonus, ex:[ids]}]`: las rutinas son datos del usuario (se siembran desde `SESS`). `bonus` no se edita: sale de la cantidad de ejercicios obligatorios (`bonusPara`).
+- `exo {id: {n, sets, reps, rest, dur, note, inc}}`: ediciones de ejercicios base (solo las diferencias; `data.js` queda como valor por defecto). `custom {c_<timestamp>: {id, n, type, muscle, sets, reps, rest, dur, note, inc}}`: ejercicios propios. El XP no es editable: los base conservan `xp`, los propios salen del tipo (`xpCustom`: sets 25, check 30, timed 10 a 40 según minutos).
+- `setup`: `'pendiente'` en una instalación nueva hasta elegir "rutina de ejemplo" o "vacío" (`views/inicio.js`); las instalaciones existentes migran con `'listo'`.
+- `log[fecha] = { s: rutina, f: copia congelada, ex: { id: { sets:[{w,r,d}], n, done, t } } }`. **Regla del congelado:** la primera vez que se toca un día (`entry`), `f` guarda la sesión de ese día (`n`, `bonus`, `color`, `img` y por ejercicio `id, n, type, xp, sets, reps, rl, rest, dur, opt, muscle`). El XP, la racha y "sesión completa" (`dayStats`) leen SOLO de `f`, nunca de las rutinas vivas, así que editar rutinas o ejercicios no altera el pasado. Un día con registro no se vuelve a congelar, salvo que el usuario elija otra rutina para hoy (`setSession`).
 - `last[id] = {w, r}` últimos valores; `prefs[id] = {dur, rest}` tiempos editados.
 - `food {goal, kcal, quick:[{id,n,g}], log:{fecha:[{n,g,t}]}, gl:{fecha:meta}}`: `g` = gramos de proteína; `gl` congela la meta del día al cargar la primera comida.
 - `read {goal, current, books:[{id,t,a,pages,cur,done}], log:{fecha:{pages,min}}, gl:{fecha:meta}}`: `done` = fecha en que se terminó (o null); `current` = id del libro actual.
 - `run {log:{fecha:{mode:'cont'|'int', min, km, feel}}}`; `dojo {log:{fecha:{type, effort, notes}}}`; `spar {log:[{id, date, rounds, feel, good, bad, work}]}`.
 - Migración en `store.js` (`migrate`): conserva todo y agrega lo que falte; antes de migrar guarda una copia de los datos previos en `arise.v1.bak<versión>` (`bak1`, `bak2`).
 - Aparte del estado principal: `arise.seen` (última versión de novedades vista) y `arise.timer` (temporizador activo).
+- Migración v3 → v4 (`rutinas.js` `aV4`): copia `SESS` a `routines` (mismos ids) y congela cada día existente desde las definiciones de ese momento; el XP, el nivel y la racha no cambian (verificado antes/después con datos de ejemplo). Se guarda `arise.v1.bak3` antes.
 - Cambios de esquema: subir `v` y migrar en `load()`; nunca romper datos existentes.
 
 ## Reglas de XP
@@ -54,8 +59,9 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - **Sin penalizaciones.** Descansar suma XP. El usuario tiende a comer poco: la alerta de proteína baja (V2) debe ser amable.
 
 ## Cómo extender
-- Nuevo ejercicio: agregar en `EX` (`E(id, nombre, {...})`) y en `ex` de las sesiones que correspondan. Tipos: `sets`, `timed`, `check`.
-- Nueva sesión: agregar en `SESS` (con `img`, `color`, `bonus`, `ex`) y, si corresponde, en el plan base.
+- Nuevo ejercicio base (para todos): agregar en `EX` (`E(id, nombre, {...})`). Tipos: `sets`, `timed`, `check`. Los del usuario se crean desde la app (Más → Rutinas) y no tocan `data.js`.
+- Rutinas: las edita el usuario en `#/rutinas`; `SESS` y `DEFAULT_PLAN` solo son el ejemplo con el que arranca una instalación nueva o migrada. Leer ejercicios con `defOf(id)` / `exFor(fecha, id)` y la sesión de un día con `sesionDia(fecha)`, nunca de `EX`/`SESS` directo.
+- Diálogos: `abrirModal` (`js/modal.js`); con `form: true` no cierra al tocar afuera y acepta `botones` propios.
 - Nueva pantalla: crear `js/views/x.js` con `render(root, ctx, arg)` (puede devolver una función de limpieza), registrarla en `VIEWS` y en `nav` de `app.js`.
 - `ctx.commit()` después de cambiar progreso (calcula y muestra +XP / subida de nivel). `ctx.refresh()` re-renderiza.
 - Al agregar archivos nuevos, sumarlos a `CORE` en `sw.js` y subir `V`.
@@ -109,9 +115,12 @@ En cada entrega: subir `APP_VERSION` según esta regla y agregar su entrada arri
 - Barra de 5 ítems (Estado, Misión, Comida, Lectura, Más); `#/mas` lleva a Plan, Diario, Historial de trote, Ajustes y Novedades.
 - Ventana de novedades y versión de la app (Estado → Ajustes).
 
-**V2c (falta)**
-- Editar series, repeticiones y descanso por ejercicio desde la app (incluye la calistenia).
-- Sugerencia automática de subir peso al cumplir las repeticiones máximas en todas las series.
+**V2c (hecha, v2.2.0)**
+- Rutinas y ejercicios editables (`#/rutinas`): crear, duplicar, renombrar, color, eliminar (con reemplazo en el plan), agregar/quitar/ordenar ejercicios, ejercicios propios, restaurar valores originales.
+- Historial congelado por día (esquema v4).
+- Sugerencia de peso en ejercicios con series: si la última vez se completaron todas las series en el tope de repeticiones, propone subir `inc` kg (2,5 por defecto; 1 en laterales y curl) con botón "Aplicar".
+- Primera vez: elegir rutina de ejemplo o empezar vacío.
+- Pendiente menor: la racha de días pasados sin registro depende del plan vigente para reconocer descansos planificados.
 
 **V3**
 - Cuerpo: peso, medidas y fotos de progreso (IndexedDB) con gráficos simples.
