@@ -1,6 +1,6 @@
 // XP, nivel, racha. Todo se calcula desde el registro: sin duplicados ni desajustes.
-import { SESS, EX, TITLES } from './data.js';
-import { get, ymd, sessionFor } from './store.js';
+import { TITLES } from './data.js';
+import { get, ymd, sessionFor, esDescanso } from './store.js';
 import { foodXP, readXP } from './habitos.js';
 import { runBonus, runDay } from './entreno.js';
 
@@ -13,20 +13,19 @@ export function isDone(ex, rec) {
   return !!rec.done;
 }
 
+// XP, ejercicios y "sesión completa" del día. Lee SIEMPRE la copia congelada (log[fecha].f), nunca las rutinas vivas:
+// editar una rutina o un ejercicio no cambia el XP de los días ya registrados.
 export function dayStats(date) {
-  const L = get().log[date];
-  if (!L) return { xp: 0, done: 0, total: 0, complete: false };
-  const sess = SESS[L.s];
-  if (!sess) return { xp: 0, done: 0, total: 0, complete: false };
+  const L = get().log[date], F = L && L.f;
+  if (!F) return { xp: 0, done: 0, total: 0, complete: false };
   let xp = 0, done = 0, total = 0;
-  for (const id of sess.ex) {
-    const ex = EX[id];
-    const ok = isDone(ex, L.ex[id]);
-    if (ok) xp += ex.xp + (id === 'trote' ? runBonus((runDay(date) || {}).min || 0) : 0);
+  for (const ex of F.ex) {
+    const ok = isDone(ex, L.ex[ex.id]);
+    if (ok) xp += ex.xp + (ex.id === 'trote' ? runBonus((runDay(date) || {}).min || 0) : 0);
     if (!ex.opt) { total++; if (ok) done++; }
   }
   const complete = total > 0 && done === total;
-  if (complete) xp += sess.bonus;
+  if (complete) xp += F.bonus;
   return { xp, done, total, complete };
 }
 
@@ -53,7 +52,7 @@ export function streak() {
     const key = ymd(d);
     if (dayStats(key).complete) n++;
     else if (first) { /* hoy aún puede completarse */ }
-    else if (sessionFor(key) === 'descanso' && !S.log[key]) { /* descanso sin marcar: no corta */ }
+    else if (esDescanso(sessionFor(key)) && !S.log[key]) { /* descanso sin marcar: no corta */ }
     else break;
     first = false;
     d.setDate(d.getDate() - 1);

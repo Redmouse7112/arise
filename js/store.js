@@ -1,10 +1,11 @@
 // Estado persistente en localStorage. Todo funciona offline.
 import { DEFAULT_PLAN, SEED_LAST } from './data.js';
+import * as R from './rutinas.js';
 
 const KEY = 'arise.v1';
 let S;
 
-export const SCHEMA = 3;
+export const SCHEMA = 4;
 
 // Alimentos rápidos por defecto: g = gramos de proteína aproximados por porción.
 const QUICK = [
@@ -16,9 +17,13 @@ const QUICK = [
 const defaults = () => ({
   v: SCHEMA,
   profile: { belt: 'amarillo', since: '2026-08', exam: '2027-03-01' },
-  plan: [...DEFAULT_PLAN],
-  over: {},            // fecha -> sesión elegida para ese día
-  log: {},             // fecha -> { s: sesión, ex: { id: { sets:[{w,r,d}], n, done, t } } }
+  setup: 'pendiente',  // 'pendiente' hasta que una instalación nueva elige rutina de ejemplo o vacío
+  routines: R.rutinasBase(),   // [{ id, n, color, img, bonus, ex: [ids] }]
+  exo: {},             // ediciones de ejercicios base: id -> { n, sets, reps, rest, dur, note, inc }
+  custom: {},          // ejercicios propios: id 'c_<timestamp>' -> { id, n, type, muscle, sets, reps, rest, dur, note, inc }
+  plan: [...DEFAULT_PLAN],   // domingo=0 -> id de rutina ('' = sin rutina)
+  over: {},            // fecha -> rutina elegida para ese día
+  log: {},             // fecha -> { s: rutina, f: copia congelada de la sesión, ex: { id: { sets:[{w,r,d}], n, done, t } } }
   last: JSON.parse(JSON.stringify(SEED_LAST)),
   prefs: {},           // id ejercicio -> { dur, rest }
   food: { goal: 180, kcal: 2600, quick: QUICK.map((q) => ({ ...q })), log: {}, gl: {} },   // log: fecha -> [{n, g, t}]; gl: meta congelada por día
@@ -31,7 +36,7 @@ const defaults = () => ({
 // Lleva datos de cualquier versión anterior al esquema actual sin borrar nada.
 function migrate(o) {
   const d = defaults();
-  return {
+  const m = {
     ...d, ...o, v: SCHEMA,
     profile: { ...d.profile, ...o.profile },
     food: { ...d.food, ...o.food, log: { ...(o.food && o.food.log) }, gl: { ...(o.food && o.food.gl) } },
@@ -40,6 +45,10 @@ function migrate(o) {
     dojo: { log: { ...(o.dojo && o.dojo.log) } },
     spar: { log: [...((o.spar && o.spar.log) || [])] },
   };
+  if (!(o.v >= 4)) Object.assign(m, R.aV4(o));   // v1-v3: sesiones pasan a ser rutinas y cada día con registro queda congelado
+  else { m.routines = Array.isArray(o.routines) ? o.routines : d.routines; m.exo = { ...o.exo }; m.custom = { ...o.custom }; }
+  m.setup = o.setup || 'listo';
+  return m;
 }
 
 export function load() {
@@ -70,14 +79,27 @@ export const ymd = (d = new Date()) =>
 export const dow = (date) => new Date(date + 'T12:00:00').getDay();
 export const sessionFor = (date) => S.log[date]?.s || S.over[date] || S.plan[dow(date)];
 
-// Devuelve el registro del día (lo crea y congela la sesión del día).
+// Devuelve el registro del día. La primera vez lo crea y congela una copia de la sesión (log[fecha].f).
 export function entry(date) {
-  if (!S.log[date]) S.log[date] = { s: sessionFor(date), ex: {} };
+  if (!S.log[date]) {
+    const sid = sessionFor(date), f = R.congelar(S, sid);
+    S.log[date] = f ? { s: sid, f, ex: {} } : { s: sid, ex: {} };
+  }
   return S.log[date];
 }
+// Elegir otra rutina para hoy: si el día ya tenía registro, se vuelve a congelar con la elegida (los ejercicios hechos se conservan).
 export function setSession(date, sid) {
   S.over[date] = sid;
-  if (S.log[date]) S.log[date].s = sid;
+  if (S.log[date]) { S.log[date].s = sid; const f = R.congelar(S, sid); if (f) S.log[date].f = f; else delete S.log[date].f; }
   save();
 }
+
+// Acceso a rutinas y ejercicios atado al estado real.
+export const defOf = (id) => R.defOf(S, id);
+export const biblioteca = () => R.biblioteca(S);
+export const routineOf = (id) => R.routineOf(S, id);
+export const esDescanso = (id) => R.esDescanso(S, id);
+export const sugerenciaPeso = (id, date) => R.sugerenciaPeso(S, id, date);
+export const sesionDia = (date) => R.sesionDia(S, date, sessionFor(date));
+export const exFor = (date, id) => { const s = sesionDia(date); return (s && s.ex.find((e) => e.id === id)) || defOf(id); };
 export const pref = (id, def) => ({ ...def, ...(S.prefs[id] || {}) });
