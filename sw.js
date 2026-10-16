@@ -1,5 +1,5 @@
 // Service worker de Arise: cache de la app para uso offline.
-const V = 'arise-v3-1';
+const V = 'arise-v3-2';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'css/base.css', 'css/ui.css',
   'js/app.js', 'js/data.js', 'js/store.js', 'js/xp.js', 'js/timer.js', 'js/ui.js', 'js/habitos.js', 'js/entreno.js', 'js/novedades.js', 'js/aviso.js',
   'js/views/estado.js', 'js/views/hoy.js', 'js/views/plan.js', 'js/views/ejercicio.js', 'js/views/comida.js', 'js/views/lectura.js', 'js/views/mas.js', 'js/views/trote.js', 'js/views/clase.js', 'js/views/spar.js',

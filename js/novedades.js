@@ -1,6 +1,11 @@
 // Registro de cambios para quien usa la app. La entrada más nueva va primero.
 // Regla: en cada entrega, subir APP_VERSION (data.js) y sumar acá su entrada, en lenguaje simple.
 export const NOVEDADES = [
+  { v: '2.1.1', fecha: '2026-10-16', items: [
+    'Corregimos el aviso de novedades para que aparezca cuando la app se actualiza.',
+    'Ya no se cierra solo si tocás la pantalla sin querer apenas se abre.',
+    'En Más → Novedades podés volver a ver la última novedad cuando quieras.',
+  ] },
   { v: '2.1.0', fecha: '2026-10-16', items: [
     'Trote con intervalos: elegí 1:1, 2:1, 3:1 o armá el tuyo, y la app te avisa cuándo cambiar.',
     'Nueva sesión de Calistenia, que podés elegir desde Misión o Plan.',

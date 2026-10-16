@@ -1,5 +1,5 @@
 // Datos estáticos de Arise: cinturones, imágenes, ejercicios y sesiones.
-export const APP_VERSION = '2.1.0';
+export const APP_VERSION = '2.1.1';
 
 export const BELTS = [
   { id: 'blanco',   n: 'Blanco',   c: '#f1f5f9' },
