@@ -1,6 +1,6 @@
 // Arranque, router por hash, barra de temporizador, toasts.
 import { load, get, ymd, save } from './store.js';
-import { initNovedades } from './aviso.js';
+import { initNovedades, hasData } from './aviso.js';
 import { BELTS } from './data.js';
 import { totalXP, levelInfo } from './xp.js';
 import * as T from './timer.js';
@@ -31,7 +31,7 @@ const ICON = {
   plan: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
 };
 
-const hadData = !!localStorage.getItem('arise.v1');   // para no mostrar novedades en la primera instalación
+const hadData = hasData();   // sin datos previos es instalación nueva: no se muestran novedades
 load();
 const root = document.getElementById('view');
 const nav = document.getElementById('nav');
