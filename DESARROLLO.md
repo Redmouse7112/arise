@@ -59,13 +59,32 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Al agregar archivos nuevos, sumarlos a `CORE` en `sw.js` y subir `V`.
 - Ejercicio con pantalla propia: crear `js/views/x.js` y registrarlo en `SPECIAL` de `app.js` (clave = id del ejercicio).
 - Temporizador por fases: `T.startPhases([{label, ms, round?, rounds?, warn?}], meta)`. `meta.kind` ('ex', 'read', 'run', 'spar') decide qué hace `app.js` al terminar; `meta.exId` oculta la barra global en esa pantalla.
-- **Regla permanente:** en cada entrega, subir `APP_VERSION` (`js/data.js`) y agregar su entrada arriba en `js/novedades.js`, escrita para el usuario final (3 a 5 viñetas, lenguaje simple). La ventana aparece una sola vez por versión. Lógica en `js/aviso.js`: instalación nueva = sin registros ni copias `arise.v1.bak*` (no se muestra); con datos y sin `arise.seen` cuenta como `0.0.0` (se muestra); las versiones se comparan como números (`cmpVer`). Más → Novedades permite volver a ver la última.
+- **Regla permanente:** en cada entrega, subir `APP_VERSION` según la sección "Versionado" y agregar su entrada arriba en `js/novedades.js`, escrita para el usuario final (3 a 5 viñetas, lenguaje simple). La ventana aparece una sola vez por versión. Lógica en `js/aviso.js`: instalación nueva = sin registros ni copias `arise.v1.bak*` (no se muestra); con datos y sin `arise.seen` cuenta como `0.0.0` (se muestra); las versiones se comparan como números (`cmpVer`). Más → Novedades permite volver a ver la última.
 
 ## Estado de imágenes
 - Emblemas de sección y músculos de Dorsales, Hombros, Deltoide posterior, Pecho y Bíceps: **hechos con Gemini/ChatGPT** (calidad final).
 - **Provisionales** (hechos por composición sobre las figuras base, a reemplazar): `sec-lectura`, `mus-core`, `mus-cuadriceps`, `mus-isquios`, `mus-agarre`.
 - **Faltante**: Pantorrillas. Hoy `MUS.pantorrillas` apunta a `img/sec-gym.webp`; al tener `img/mus-pantorrillas.webp`, cambiar la ruta en `js/data.js`. Se pide a Gemini: vista trasera de piernas completas con las pantorrillas resaltadas, mismo estilo que los demás.
 - Convertir nuevas imágenes a WebP (≈512 px emblemas, ≈720 px músculos, calidad 80) para mantener la app liviana.
+
+## Versionado
+`APP_VERSION` (en `js/data.js`) usa **MAYOR.MENOR.PARCHE**:
+- **Parche**: correcciones sin funciones nuevas.
+- **Menor**: cada entrega de funciones dentro de una fase.
+- **Mayor**: una fase completa nueva o un cambio que altere cómo se usa la app.
+
+| Entrega | Versión |
+|---|---|
+| V1 | 1.0.0 |
+| V2a | 2.0.0 |
+| V2b | 2.1.0 |
+| Arreglo de novedades | 2.1.1 |
+| V2c | 2.2.0 |
+| V3 | 3.0.0 |
+
+El `v` del esquema de datos (`localStorage`) es **independiente** de `APP_VERSION`: solo sube cuando cambia la forma de los datos guardados y se migra en `load()`.
+
+En cada entrega: subir `APP_VERSION` según esta regla y agregar su entrada arriba en `js/novedades.js`.
 
 ## Pendiente y hoja de ruta
 **Datos por confirmar con el usuario**
