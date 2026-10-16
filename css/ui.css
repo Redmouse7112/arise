@@ -117,3 +117,24 @@ input.nm:focus, input.tx:focus, .fld input:focus { outline: 2px solid var(--acc)
 .bars .col u { position: absolute; left: -4px; right: -4px; height: 0; border-top: 1px dashed var(--ink); opacity: .55; }
 .bars em { font-style: normal; font-size: .72rem; color: var(--mut); }
 .bars .today em { color: var(--ink); font-weight: 700; }
+
+/* V2b: trote, clase, sparring, más y novedades */
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; border-radius: 12px; border: 1px solid var(--line); background: rgba(2, 8, 22, .6); }
+.seg button { padding: 9px; border-radius: 9px; font-weight: 600; color: var(--mut); }
+.seg button.on { background: color-mix(in srgb, var(--acc) 22%, transparent); color: var(--ink); box-shadow: 0 0 0 1px var(--acc) inset; }
+.chip-b.sel { border-color: var(--acc); box-shadow: 0 0 12px color-mix(in srgb, var(--acc) 40%, transparent); }
+.feel { display: flex; gap: 8px; }
+.feel button { flex: 1; padding: 10px 0; border-radius: 10px; border: 1px solid var(--line); background: rgba(10, 20, 44, .5); font-weight: 700; }
+.feel button.on { background: var(--acc); color: #04121a; border-color: transparent; box-shadow: 0 0 14px color-mix(in srgb, var(--acc) 50%, transparent); }
+textarea { width: 100%; padding: 9px 10px; border-radius: 10px; background: rgba(2, 8, 22, .8); border: 1px solid var(--line); font: inherit; font-size: .95rem; text-transform: none; letter-spacing: 0; resize: vertical; color: var(--ink); }
+textarea:focus { outline: 2px solid var(--acc); }
+.mnu { grid-template-columns: 1fr auto; padding: 14px; }
+.vlist { margin: 10px 0 0; padding-left: 18px; }
+.vlist li { margin: 4px 0; font-size: .92rem; }
+#news { position: fixed; left: 50%; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 84px); z-index: 70; width: min(92vw, 400px); margin: 0;
+  transform: translate(-50%, 14px); opacity: 0; pointer-events: none; transition: opacity .3s ease, transform .3s ease; }
+#news.on { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+#news ul { margin: 0; padding-left: 18px; font-size: .88rem; }
+#news li { margin: 3px 0; }
+@media (min-width: 900px) { #news { left: calc(50% + 100px); bottom: 24px; } }
+@media (prefers-reduced-motion: reduce) { #news { transition: none; } .bar > b, .ring .fg { transition: none; } }
