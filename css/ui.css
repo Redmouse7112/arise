@@ -141,3 +141,8 @@ textarea:focus { outline: 2px solid var(--acc); }
 .mdl ul { margin: 0; padding-left: 18px; }
 .mdl li { margin: 3px 0; }
 @media (prefers-reduced-motion: reduce) { .mw, .mdl { transition: none; } .mdl { transform: none; } .bar > b, .ring .fg { transition: none; } }
+
+/* iOS Safari amplía la pantalla al enfocar campos con letra menor a 16 px */
+@supports (-webkit-touch-callout: none) { input, select, textarea { font-size: 16px; } }
+.pasos { margin: 0; padding-left: 20px; font-size: .92rem; }
+.pasos li { margin: 4px 0; }
