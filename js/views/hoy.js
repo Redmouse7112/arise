@@ -2,6 +2,8 @@
 import { SESS, IMG } from '../data.js';
 import { get, ymd, sessionFor, setSession } from '../store.js';
 import { dayStats } from '../xp.js';
+import { lastWork } from '../entreno.js';
+import { esc } from '../ui.js';
 import { muscleImg, target, exDone, sessEx, CHECK, habitCards } from '../ui.js';
 
 export function render(root, ctx) {
@@ -19,6 +21,8 @@ export function render(root, ctx) {
         <div class="mut num" style="font-size:.8rem;margin-top:5px">${doneReq}/${req} ejercicios${st.complete ? ` · ¡Sesión completa! +${sess.bonus} XP bonus` : ''}</div></div>
     </div>
   </section>
+
+  ${sid === 'sparring' && lastWork() ? `<section class="panel sc" style="--sc:#ef4444"><div class="up">Para trabajar hoy</div><p style="margin:6px 0 0">${esc(lastWork())}</p></section>` : ''}
 
   <div>${exs.map((e) => {
     const d = exDone(e.id, date);

@@ -1,5 +1,6 @@
 // Arranque, router por hash, barra de temporizador, toasts.
 import { load, get, ymd, save } from './store.js';
+import { initNovedades } from './aviso.js';
 import { BELTS } from './data.js';
 import { totalXP, levelInfo } from './xp.js';
 import * as T from './timer.js';
@@ -11,10 +12,18 @@ const VIEWS = {
   hoy: () => import('./views/hoy.js'),
   comida: () => import('./views/comida.js'),
   lectura: () => import('./views/lectura.js'),
+  mas: () => import('./views/mas.js'),
   plan: () => import('./views/plan.js'),
+  sparring: () => import('./views/diario.js'),
+  trote: () => import('./views/historial.js'),
+  novedades: () => import('./views/novedades.js'),
   ej: () => import('./views/ejercicio.js'),
 };
+// Ejercicios con pantalla propia (el resto usa views/ejercicio.js).
+const SPECIAL = { trote: () => import('./views/trote.js'), clase: () => import('./views/clase.js'), spar: () => import('./views/spar.js') };
+const NAVKEY = { ej: 'hoy', plan: 'mas', sparring: 'mas', trote: 'mas', novedades: 'mas' };
 const ICON = {
+  mas: '<svg viewBox="0 0 24 24"><circle cx="5.500" cy="12" r="1.600"/><circle cx="12" cy="12" r="1.600"/><circle cx="18.500" cy="12" r="1.600"/></svg>',
   estado: '<svg viewBox="0 0 24 24"><path d="M12 2l8.5 5v10L12 22l-8.5-5V7z"/><path d="M12 8v5l3 2"/></svg>',
   hoy: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>',
   comida: '<svg viewBox="0 0 24 24"><path d="M7 3v8a2 2 0 0 0 2 2v8M11 3v8a2 2 0 0 1-2 2M9 3v6"/><path d="M17 3c-2 2-3 4.500-3 7.500 0 1.500 1 2.500 3 2.500v8"/></svg>',
@@ -22,6 +31,7 @@ const ICON = {
   plan: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
 };
 
+const hadData = !!localStorage.getItem('arise.v1');   // para no mostrar novedades en la primera instalación
 load();
 const root = document.getElementById('view');
 const nav = document.getElementById('nav');
@@ -29,7 +39,7 @@ const tbar = document.getElementById('tbar');
 const toastEl = document.getElementById('toast');
 let cleanup = null, lastXP = totalXP(), tTimer;
 
-nav.innerHTML = [['estado', 'Estado'], ['hoy', 'Misión'], ['comida', 'Comida'], ['lectura', 'Lectura'], ['plan', 'Plan']]
+nav.innerHTML = [['estado', 'Estado'], ['hoy', 'Misión'], ['comida', 'Comida'], ['lectura', 'Lectura'], ['mas', 'Más']]
   .map(([k, n]) => `<a href="#/${k}" data-k="${k}">${ICON[k]}<span>${n}</span></a>`).join('');
 
 export function toast(msg) {
@@ -60,12 +70,13 @@ async function route(keep) {
   theme();
   const [, k = 'estado', arg] = location.hash.replace('#', '').split('/');
   const name = VIEWS[k] ? k : 'estado';
-  nav.querySelectorAll('a').forEach((a) => a.classList.toggle('on', a.dataset.k === (name === 'ej' ? 'hoy' : name)));
-  const mod = await VIEWS[name]();
+  nav.querySelectorAll('a').forEach((a) => a.classList.toggle('on', a.dataset.k === (NAVKEY[name] || name)));
+  const mod = await (name === 'ej' && SPECIAL[arg] ? SPECIAL[arg]() : VIEWS[name]());
   const c = mod.render(root, ctx, arg);
   cleanup = typeof c === 'function' ? c : null;
   root.style.animation = 'none'; void root.offsetWidth; root.style.animation = '';
-  if (!keep) window.scrollTo(0, 0);
+  if (k === 'estado' && arg === 'ajustes') { const a = document.getElementById('ajustes'); if (a) a.scrollIntoView(); }
+  else if (!keep) window.scrollTo(0, 0);
   renderBar(T.view());
 }
 window.addEventListener('hashchange', () => route());
@@ -73,16 +84,18 @@ window.addEventListener('hashchange', () => route());
 // ---- barra global del temporizador ----
 let barSig = '';
 function renderBar(v) {
-  const here = v && v.meta && v.meta.kind === 'ex' && location.hash === `#/ej/${v.meta.exId}`;
+  const here = v && v.meta && v.meta.exId && location.hash === `#/ej/${v.meta.exId}`;
   if (!v || here) { tbar.innerHTML = ''; tbar.className = ''; barSig = ''; return; }
-  const txt = v.mode === 'down' ? T.fmt(v.left) : T.fmtUp(v.elapsed);
-  const sig = `${v.mode}|${v.paused}|${v.done}`;
+  const txt = v.mode === 'up' ? T.fmtUp(v.elapsed) : T.fmt(v.left);
+  const label = v.mode === 'phases' ? `${v.phase.round ? `Ronda ${v.phase.round}/${v.phase.rounds} · ` : ''}${v.phase.label}` : v.meta.label || '';
+  const sig = `${v.mode}|${v.paused}|${v.done}|${v.idx}`;
   tbar.className = v.done ? 'done' : '';
   if (sig !== barSig) {
     barSig = sig;
-    tbar.innerHTML = `<div><span class="tt num" id="tbt"></span><span class="tl">${v.done ? '¡Tiempo cumplido!' : v.meta.label || ''}</span>
+    tbar.innerHTML = `<div><span class="tt num" id="tbt"></span><span class="tl">${v.done ? '¡Tiempo cumplido!' : label}</span>
       ${v.done ? '' : `<button class="btn sm" id="tp">${v.paused ? 'Seguir' : 'Pausa'}</button>`}
-      ${v.mode === 'down' && !v.done ? '<button class="btn sm" id="t30">+30</button>' : ''}
+      ${v.mode !== 'up' && !v.done ? '<button class="btn sm" id="t30">+30</button>' : ''}
+      ${v.meta.exId && v.meta.kind !== 'ex' ? `<a class="btn sm" href="#/ej/${v.meta.exId}">Abrir</a>` : ''}
       <button class="btn sm ghost" id="tx">${v.done ? 'Cerrar' : 'Parar'}</button></div>`;
     const on = (s, f) => { const e = tbar.querySelector(s); if (e) e.addEventListener('click', f); };
     on('#tp', () => (T.view().paused ? T.resume() : T.pause()));
@@ -97,6 +110,8 @@ T.sub((type, v) => {
       markDone(v.meta.date, v.meta.exId, Math.round(v.total / 1000));
       ctx.commit(); toast('¡Hecho!');
       if (location.hash.startsWith('#/ej/') || location.hash === '#/hoy') route();
+    } else if (v.meta.kind === 'run' || v.meta.kind === 'spar') {
+      toast('¡Terminaste! Guardá tu registro');
     } else if (v.meta.kind === 'read') {
       addMinutes(v.meta.date, v.meta.min || Math.round(v.total / 60000));
       toast(`Lectura terminada · ${v.meta.min || Math.round(v.total / 60000)} min`);
@@ -108,6 +123,7 @@ T.sub((type, v) => {
 
 // ---- inicio ----
 route().then(() => {
+  initNovedades(hadData);
   setTimeout(() => document.getElementById('splash').classList.add('off'), 700);
 });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});

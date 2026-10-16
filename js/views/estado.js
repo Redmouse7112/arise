@@ -1,5 +1,5 @@
 // Pantalla Estado: rango (cinturón), nivel, XP, racha, semana y ajustes.
-import { BELTS, IMG, SESS } from '../data.js';
+import { BELTS, IMG, SESS, APP_VERSION } from '../data.js';
 import { get, save, ymd, dow, sessionFor, exportJSON, importJSON, reset } from '../store.js';
 import { habitCards } from '../ui.js';
 import { totalXP, levelInfo, streak, dayStats } from '../xp.js';
@@ -57,7 +57,7 @@ export function render(root, ctx) {
 
   <section class="panel"><div class="up" style="margin-bottom:10px">Esta semana</div><div class="week">${weekStrip()}</div></section>
 
-  <section class="panel">
+  <section class="panel" id="ajustes">
     <div class="up" style="margin-bottom:6px">Ajustes</div>
     <table class="tbl">
       <tr><td>Cinturón</td><td><select class="s" id="belt">${BELTS.map((b) => `<option value="${b.id}" ${b.id === belt.id ? 'selected' : ''}>${b.n}</option>`).join('')}</select></td></tr>
@@ -70,6 +70,7 @@ export function render(root, ctx) {
       <button class="btn sm ghost" id="rst">Borrar todo</button>
     </div>
     <p class="mut" style="font-size:.78rem;margin:12px 0 0">Tus datos viven solo en este dispositivo. Exportá una copia de vez en cuando.</p>
+    <p class="mut num" style="font-size:.78rem;margin:8px 0 0">Arise v${APP_VERSION} · <a href="#/novedades" style="text-decoration:underline">Novedades</a></p>
   </section>`;
 
   const on = (id, ev, f) => root.querySelector(id).addEventListener(ev, f);
