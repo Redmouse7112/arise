@@ -24,6 +24,13 @@ export function init(toastFn) {
   window.addEventListener('appinstalled', () => { deferred = null; ls.set(FLAG, '1'); toast('Arise instalada'); notify(); });
 }
 
+// iPhone/iPad; iPadOS se presenta como Mac, se distingue por la pantalla táctil.
+export const esIOS = (ua = navigator.userAgent, touch = navigator.maxTouchPoints > 1) => /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && touch);
+// En iOS solo Safari instala; Chrome, Firefox, Edge, etc. de iOS tienen que abrir el enlace en Safari.
+export const safariIOS = (ua = navigator.userAgent) => !/CriOS|FxiOS|EdgiOS|OPiOS|OPT\/|GSA\/|DuckDuckGo|YaBrowser/.test(ua);
+const PASOS_IOS = 'Tocá el botón <b>Compartir</b> y elegí <b>Agregar a inicio</b> (en algunos iPhone se llama «Agregar a pantalla de inicio» o «Add to Home Screen»).';
+const AVISO_7D = 'Instalá la app para que iOS no borre tus datos si pasan 7 días sin abrirla.';
+
 // Navegador detectado → instrucciones que existen de verdad en ese navegador.
 export function navegador(ua = navigator.userAgent, touchMac = navigator.maxTouchPoints > 1) {
   if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && touchMac)) return 'ios';
@@ -36,7 +43,7 @@ export function navegador(ua = navigator.userAgent, touchMac = navigator.maxTouc
   return 'otro';
 }
 const AYUDA = {
-  ios: 'Tocá el botón <b>Compartir</b> y elegí <b>Agregar a pantalla de inicio</b>. Si no te aparece esa opción, abrí Arise en Safari.',
+  ios: PASOS_IOS + ' Hacelo desde Safari.',
   android: 'Tocá el menú <b>⋮</b> del navegador y elegí <b>Instalar app</b>.',
   'firefox-android': 'Tocá el menú <b>⋮</b> del navegador y elegí <b>Instalar</b>.',
   escritorio: 'Buscá el <b>ícono de instalar</b> a la derecha de la barra de direcciones y tocalo.',
@@ -46,9 +53,20 @@ const AYUDA = {
 };
 export const ayudaPara = (n) => AYUDA[n] || AYUDA.otro;
 
+const copiar = async () => {
+  try { await navigator.clipboard.writeText(location.href.split('#')[0]); toast('Enlace copiado'); } catch { toast('No se pudo copiar el enlace'); }
+};
+function pasosIOS() {
+  return safariIOS()
+    ? `<ol class="pasos"><li>Abrí Arise en <b>Safari</b>.</li><li>Tocá el botón <b>Compartir</b>.</li><li>Elegí <b>Agregar a inicio</b> (en algunos iPhone se llama «Agregar a pantalla de inicio» o «Add to Home Screen»).</li></ol>`
+    : `<p style="margin:0 0 8px">Para instalarla en iPhone tenés que abrir este enlace en <b>Safari</b>. Copialo y pegalo allá; después tocá <b>Compartir</b> y <b>Agregar a inicio</b>.</p>`;
+}
+
 export async function instalar() {
   if (!deferred) {
-    abrirModal({ id: 'instalarAyuda', label: 'Cómo instalar Arise', titulo: 'Instalar Arise', html: `<p style="margin:0">${ayudaPara(navegador())}</p>`, boton: 'Entendido' });
+    const ios = esIOS();
+    abrirModal({ id: 'instalarAyuda', label: 'Cómo instalar Arise', titulo: 'Instalar Arise',
+      html: ios ? `${pasosIOS()}<p class="mut" style="margin:8px 0 0">${AVISO_7D}</p>` : `<p style="margin:0">${ayudaPara(navegador())}</p>`, boton: 'Entendido' });
     return;
   }
   const e = deferred; deferred = null;
@@ -63,11 +81,17 @@ export async function instalar() {
 // Tarjeta discreta para Estado (vacía si ya está instalada o si la descartaste).
 export function tarjetaHTML() {
   if (isInstalled() || cardDismissed()) return '';
+  if (esIOS()) {   // iOS no tiene botón de instalar: pasos manuales
+    return `<section class="panel" id="instCard"><div class="up" style="margin-bottom:6px">Instalar en iOS</div>
+      ${pasosIOS()}<p style="margin:8px 0 12px;font-size:.88rem">${AVISO_7D}</p>
+      <div class="btns" style="justify-content:flex-start">${safariIOS() ? '' : '<button class="btn sm pri" id="instCopy">Copiar enlace</button>'}<button class="btn sm ghost" id="instNo">Ahora no</button></div></section>`;
+  }
   return `<section class="panel" id="instCard"><div class="up" style="margin-bottom:6px">Instalar</div>
     <p style="margin:0 0 12px;font-size:.92rem">Instalá Arise en tu dispositivo: abre más rápido y funciona sin internet.</p>
     <div class="btns" style="justify-content:flex-start"><button class="btn sm pri" id="instBtn">Instalar Arise</button><button class="btn sm ghost" id="instNo">Ahora no</button></div></section>`;
 }
 export function tarjetaBind(root) {
   const b = root.querySelector('#instBtn'); if (b) b.onclick = instalar;
+  const c = root.querySelector('#instCopy'); if (c) c.onclick = copiar;
   const n = root.querySelector('#instNo'); if (n) n.onclick = dismissCard;
 }

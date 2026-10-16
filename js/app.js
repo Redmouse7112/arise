@@ -124,6 +124,8 @@ T.sub((type, v) => {
 
 // ---- inicio ----
 Inst.init(toast);
+// Pedir almacenamiento persistente (si el navegador lo soporta); sin avisos si falla.
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch {}
 // Si cambia el estado de instalación, redibujo Estado o Más (sin tocar un campo que se esté escribiendo).
 Inst.onChange(() => { if (/^#\/(estado|mas)?$|^#\/(estado|mas)\//.test(location.hash || '#/estado') && !document.querySelector('#view :focus')) route(true); });
 route().then(() => {

@@ -2,7 +2,7 @@
 import { BELTS, IMG, SESS, APP_VERSION } from '../data.js';
 import { get, save, ymd, dow, sessionFor, exportJSON, importJSON, reset } from '../store.js';
 import { habitCards } from '../ui.js';
-import { tarjetaHTML, tarjetaBind } from '../instalar.js';
+import { tarjetaHTML, tarjetaBind, esIOS } from '../instalar.js';
 import { totalXP, levelInfo, streak, dayStats } from '../xp.js';
 
 const DL = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
@@ -67,6 +67,7 @@ export function render(root, ctx) {
       <tr><td>Se obtuvo</td><td><input type="month" id="since" value="${S.profile.since}"></td></tr>
       <tr><td>Próximo examen</td><td><input type="date" id="exam" value="${S.profile.exam}"></td></tr>
     </table>
+    ${esIOS() ? '<p class="msg">iPhone y iPad: guardá una copia de seguridad. Si usás Arise desde Safari sin instalarla y pasan 7 días sin abrirla, iOS puede borrar tus datos.</p>' : ''}
     <div class="btns" style="margin-top:14px">
       <button class="btn sm" id="exp">Exportar copia</button>
       <label class="btn sm">Importar<input type="file" id="imp" accept="application/json" hidden></label>
