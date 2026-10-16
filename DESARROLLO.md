@@ -59,7 +59,7 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Al agregar archivos nuevos, sumarlos a `CORE` en `sw.js` y subir `V`.
 - Ejercicio con pantalla propia: crear `js/views/x.js` y registrarlo en `SPECIAL` de `app.js` (clave = id del ejercicio).
 - Temporizador por fases: `T.startPhases([{label, ms, round?, rounds?, warn?}], meta)`. `meta.kind` ('ex', 'read', 'run', 'spar') decide qué hace `app.js` al terminar; `meta.exId` oculta la barra global en esa pantalla.
-- **Regla permanente:** en cada entrega, subir `APP_VERSION` (`js/data.js`) y agregar su entrada arriba en `js/novedades.js`, escrita para el usuario final (3 a 5 viñetas, lenguaje simple). La ventana aparece una sola vez por versión.
+- **Regla permanente:** en cada entrega, subir `APP_VERSION` (`js/data.js`) y agregar su entrada arriba en `js/novedades.js`, escrita para el usuario final (3 a 5 viñetas, lenguaje simple). La ventana aparece una sola vez por versión. Lógica en `js/aviso.js`: instalación nueva = sin registros ni copias `arise.v1.bak*` (no se muestra); con datos y sin `arise.seen` cuenta como `0.0.0` (se muestra); las versiones se comparan como números (`cmpVer`). Más → Novedades permite volver a ver la última.
 
 ## Estado de imágenes
 - Emblemas de sección y músculos de Dorsales, Hombros, Deltoide posterior, Pecho y Bíceps: **hechos con Gemini/ChatGPT** (calidad final).
