@@ -1,6 +1,7 @@
 // Arranque, router por hash, barra de temporizador, toasts.
 import { load, get, ymd, save } from './store.js';
 import { initNovedades, hasData } from './aviso.js';
+import { esc } from './ui.js';
 import * as Inst from './instalar.js';
 import { BELTS } from './data.js';
 import { totalXP, levelInfo } from './xp.js';
@@ -14,6 +15,8 @@ const VIEWS = {
   comida: () => import('./views/comida.js'),
   lectura: () => import('./views/lectura.js'),
   mas: () => import('./views/mas.js'),
+  rutinas: () => import('./views/rutinas.js'),
+  inicio: () => import('./views/inicio.js'),
   plan: () => import('./views/plan.js'),
   sparring: () => import('./views/diario.js'),
   trote: () => import('./views/historial.js'),
@@ -22,7 +25,7 @@ const VIEWS = {
 };
 // Ejercicios con pantalla propia (el resto usa views/ejercicio.js).
 const SPECIAL = { trote: () => import('./views/trote.js'), clase: () => import('./views/clase.js'), spar: () => import('./views/spar.js') };
-const NAVKEY = { ej: 'hoy', plan: 'mas', sparring: 'mas', trote: 'mas', novedades: 'mas' };
+const NAVKEY = { ej: 'hoy', plan: 'mas', rutinas: 'mas', sparring: 'mas', trote: 'mas', novedades: 'mas' };
 const ICON = {
   mas: '<svg viewBox="0 0 24 24"><circle cx="5.500" cy="12" r="1.600"/><circle cx="12" cy="12" r="1.600"/><circle cx="18.500" cy="12" r="1.600"/></svg>',
   estado: '<svg viewBox="0 0 24 24"><path d="M12 2l8.5 5v10L12 22l-8.5-5V7z"/><path d="M12 8v5l3 2"/></svg>',
@@ -70,7 +73,9 @@ async function route(keep) {
   if (cleanup) { try { cleanup(); } catch {} cleanup = null; }
   theme();
   const [, k = 'estado', arg] = location.hash.replace('#', '').split('/');
-  const name = VIEWS[k] ? k : 'estado';
+  const pend = get().setup === 'pendiente';   // instalación nueva: primero elegir rutina de ejemplo o vacío
+  document.body.classList.toggle('setup', pend);
+  const name = pend ? 'inicio' : VIEWS[k] ? k : 'estado';
   nav.querySelectorAll('a').forEach((a) => a.classList.toggle('on', a.dataset.k === (NAVKEY[name] || name)));
   const mod = await (name === 'ej' && SPECIAL[arg] ? SPECIAL[arg]() : VIEWS[name]());
   const c = mod.render(root, ctx, arg);
@@ -93,7 +98,7 @@ function renderBar(v) {
   tbar.className = v.done ? 'done' : '';
   if (sig !== barSig) {
     barSig = sig;
-    tbar.innerHTML = `<div><span class="tt num" id="tbt"></span><span class="tl">${v.done ? '¡Tiempo cumplido!' : label}</span>
+    tbar.innerHTML = `<div><span class="tt num" id="tbt"></span><span class="tl">${v.done ? '¡Tiempo cumplido!' : esc(label)}</span>
       ${v.done ? '' : `<button class="btn sm" id="tp">${v.paused ? 'Seguir' : 'Pausa'}</button>`}
       ${v.mode !== 'up' && !v.done ? '<button class="btn sm" id="t30">+30</button>' : ''}
       ${v.meta.exId && v.meta.kind !== 'ex' ? `<a class="btn sm" href="#/ej/${v.meta.exId}">Abrir</a>` : ''}

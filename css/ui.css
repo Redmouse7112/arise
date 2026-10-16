@@ -146,3 +146,24 @@ textarea:focus { outline: 2px solid var(--acc); }
 @supports (-webkit-touch-callout: none) { input, select, textarea { font-size: 16px; } }
 .pasos { margin: 0; padding-left: 20px; font-size: .92rem; }
 .pasos li { margin: 4px 0; }
+
+/* V2c: rutinas, sugerencia de peso, primera vez */
+.sug { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--acc); background: color-mix(in srgb, var(--acc) 10%, transparent); }
+.sug > div { flex: 1; min-width: 0; }
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+.sw { width: 40px; height: 40px; border-radius: 50%; border: 3px solid transparent; }
+.sw.on { border-color: var(--ink); box-shadow: 0 0 10px currentColor; }
+.thumb { width: 44px; height: 44px; flex: none; border-radius: 10px; overflow: hidden; background: #020611; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.mpreview { margin-top: 12px; width: 88px; height: 88px; border-radius: 12px; overflow: hidden; background: #020611; }
+.mpreview img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.mvs { display: flex; gap: 6px; flex: none; }
+.mv { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: rgba(20, 40, 80, .5); font-size: 1.05rem; }
+.mv:disabled { opacity: .3; }
+.mv:active { transform: scale(.94); }
+.mdl select.pick { margin-top: 4px; }
+.mdl .fld input, .mdl .fld select { text-transform: none; letter-spacing: 0; }
+body.setup #nav, body.setup #tbar { display: none; }
+@media (max-width: 420px) { .mvs { gap: 4px; } .mv { width: 36px; } }
+
+.mdl .btn { min-height: 44px; padding: 8px 16px; }
