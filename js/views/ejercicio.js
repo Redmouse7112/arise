@@ -2,7 +2,7 @@
 import { EX, MUS, SESS } from '../data.js';
 import { get, save, ymd, sessionFor, entry, pref } from '../store.js';
 import * as T from '../timer.js';
-import { muscleImg, target, CHECK } from '../ui.js';
+import { muscleImg, target, durTxt, CHECK } from '../ui.js';
 
 const topReps = (r) => parseInt(String(r).split('-').pop(), 10) || '';
 const C = 2 * Math.PI * 100;
@@ -23,6 +23,7 @@ export function render(root, ctx, id) {
   const last = S.last[id];
   const mus = MUS[ex.muscle] || MUS.cardio;
   let off = null;
+  const STEP = ex.step || 60;
 
   let body = '';
   if (ex.type === 'sets') {
@@ -57,7 +58,7 @@ export function render(root, ctx, id) {
     <section class="panel sc">
       <div class="ring"><svg viewBox="0 0 220 220"><circle class="bg" cx="110" cy="110" r="100"/><circle class="fg" id="rf" cx="110" cy="110" r="100" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg>
         <div class="tm"><b id="rt">--:--</b><span class="up" id="rs">${ex.n}</span></div></div>
-      <div class="stepper" id="dur"><button class="btn sm" data-dur="-60">−1 min</button><b class="num" id="durv">${Math.round(P.dur / 60)} min</b><button class="btn sm" data-dur="60">+1 min</button></div>
+      <div class="stepper" id="dur"><button class="btn sm" data-dur="-${STEP}">−${STEP === 60 ? '1 min' : STEP + ' s'}</button><b class="num" id="durv">${durTxt(P.dur)}</b><button class="btn sm" data-dur="${STEP}">+${STEP === 60 ? '1 min' : STEP + ' s'}</button></div>
       <div class="btns" id="tb"></div>
     </section>`;
   } else {
@@ -129,7 +130,7 @@ export function render(root, ctx, id) {
     paint(T.view());
     off = T.sub((type, v) => { if (root.isConnected && q('#rt')) paint(v); });
     root.querySelectorAll('[data-dur]').forEach((b) => b.addEventListener('click', () => {
-      S.prefs[id] = { ...(S.prefs[id] || {}), dur: Math.max(60, P.dur + +b.dataset.dur) }; save(); ctx.refresh();
+      S.prefs[id] = { ...(S.prefs[id] || {}), dur: Math.max(STEP, P.dur + +b.dataset.dur) }; save(); ctx.refresh();
     }));
   } else {
     q('#tog').addEventListener('click', () => {
