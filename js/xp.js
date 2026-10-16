@@ -2,6 +2,7 @@
 import { SESS, EX, TITLES } from './data.js';
 import { get, ymd, sessionFor } from './store.js';
 import { foodXP, readXP } from './habitos.js';
+import { runBonus, runDay } from './entreno.js';
 
 export function isDone(ex, rec) {
   if (!rec) return false;
@@ -21,7 +22,7 @@ export function dayStats(date) {
   for (const id of sess.ex) {
     const ex = EX[id];
     const ok = isDone(ex, L.ex[id]);
-    if (ok) xp += ex.xp;
+    if (ok) xp += ex.xp + (id === 'trote' ? runBonus((runDay(date) || {}).min || 0) : 0);
     if (!ex.opt) { total++; if (ok) done++; }
   }
   const complete = total > 0 && done === total;

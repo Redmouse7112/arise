@@ -1,4 +1,6 @@
 // Datos estáticos de Arise: cinturones, imágenes, ejercicios y sesiones.
+export const APP_VERSION = '2.1.0';
+
 export const BELTS = [
   { id: 'blanco',   n: 'Blanco',   c: '#f1f5f9' },
   { id: 'amarillo', n: 'Amarillo', c: '#fbbf24' },
@@ -51,6 +53,12 @@ export const EX = {
   split:    E('split', 'Sentadilla dividida', { reps: '8-10', muscle: 'cuadriceps', note: 'Por pierna.' }),
   puente:   E('puente', 'Puente de glúteo', { reps: '10-12', muscle: 'isquios', note: 'Pausa de 1 segundo arriba.' }),
   biciFin:  E('biciFin', 'Bici · final (opcional)', { type: 'timed', dur: 900, xp: 20, opt: true, muscle: 'cardio', note: 'Reemplaza al trote. Suave; si venís cansado, bajala a 10 min.' }),
+  dominadas:E('dominadas', 'Dominadas o negativas', { sets: 4, reps: '3-6', rest: 120, muscle: 'dorsales', note: 'Si todavía no salen completas, hacé negativas: subí con un salto y bajá en 3 a 5 segundos.' }),
+  flexiones:E('flexiones', 'Flexiones', { sets: 4, reps: '10-15', rest: 75, muscle: 'pecho', note: 'Cuerpo en línea recta, pecho cerca del piso.' }),
+  fondos:   E('fondos', 'Fondos en paralelas o banco', { reps: '8-12', rest: 90, muscle: 'hombros', note: 'Bajá controlado, sin encoger los hombros.' }),
+  remoinv:  E('remoinv', 'Remo invertido', { reps: '8-12', rest: 90, muscle: 'biceps', note: 'Cuerpo recto, llevá el pecho hacia la barra.' }),
+  plancha:  E('plancha', 'Plancha', { type: 'timed', dur: 45, step: 15, rounds: 3, xp: 25, muscle: 'core', note: 'Hacé 3 series de 45 s, con 45 s de descanso entre una y otra. Repetí el temporizador.' }),
+  piernascol:E('piernascol', 'Elevación de piernas colgado', { reps: '8-12', rest: 60, muscle: 'core', note: 'Colgado de la barra, sin balancearte.' }),
   trote:    E('trote', 'Trote suave', { type: 'timed', dur: 1200, xp: 40, muscle: 'cardio', note: 'Ritmo en el que puedas hablar. Si estás muy cansado, caminá.' }),
   clase:    E('clase', 'Clase en Spartans', { type: 'check', xp: 60, muscle: 'cardio' }),
   spar:     E('spar', 'Sparring', { type: 'check', xp: 80, muscle: 'cardio' }),
@@ -62,6 +70,8 @@ export const SESS = {
           ex: ['bici', 'jalon', 'remo', 'pressmil', 'banca', 'facepull', 'laterales', 'curl', 'farmer', 'gemelos', 'crunch', 'piernas', 'biciFin'] },
   gym2: { n: 'Gym 2 · Cadera y piernas', img: 'gym', color: '#38bdf8', bonus: 60,
           ex: ['bici', 'rdl', 'split', 'puente', 'farmer', 'gemelos', 'crunch', 'piernas', 'biciFin'] },
+  calistenia: { n: 'Calistenia', img: 'calistenia', color: '#a78bfa', bonus: 50,
+                ex: ['dominadas', 'flexiones', 'fondos', 'remoinv', 'plancha', 'piernascol'] },
   trote:{ n: 'Trote', img: 'trote', color: '#fbbf24', bonus: 15, ex: ['trote'] },
   dojo: { n: 'Dojo · Spartans', img: 'dojo', color: '#fbbf24', bonus: 0, ex: ['clase'] },
   sparring: { n: 'Sparring', img: 'sparring', color: '#ef4444', bonus: 0, ex: ['spar'] },
