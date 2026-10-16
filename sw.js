@@ -1,5 +1,5 @@
 // Service worker de Arise: cache de la app para uso offline.
-const V = 'arise-v2-1';
+const V = 'arise-v2-2';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'css/base.css', 'css/ui.css',
   'js/app.js', 'js/data.js', 'js/store.js', 'js/xp.js', 'js/timer.js', 'js/ui.js', 'js/habitos.js',
   'js/views/estado.js', 'js/views/hoy.js', 'js/views/plan.js', 'js/views/ejercicio.js', 'js/views/comida.js', 'js/views/lectura.js',
@@ -13,10 +13,10 @@ self.addEventListener('install', (e) => { e.waitUntil(caches.open(V).then((c) =>
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== V).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
-// Primero la red (para ver cambios al actualizar), si falla usa el caché.
+// Primero la red, saltando el caché HTTP de GitHub Pages (para ver cambios al actualizar), si falla usa el caché.
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(fetch(e.request).then((r) => {
+  e.respondWith(fetch(e.request, { cache: 'no-cache' }).then((r) => {
     const copy = r.clone(); caches.open(V).then((c) => c.put(e.request, copy)); return r;
   }).catch(() => caches.match(e.request).then((m) => m || caches.match('index.html'))));
 });
