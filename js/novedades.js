@@ -1,6 +1,11 @@
 // Registro de cambios para quien usa la app. La entrada más nueva va primero.
 // Regla: en cada entrega, subir APP_VERSION (data.js) y sumar acá su entrada, en lenguaje simple.
 export const NOVEDADES = [
+  { v: '2.1.2', fecha: '2026-10-16', items: [
+    'La ventana de novedades ahora aparece centrada en la pantalla.',
+    'Ya podés instalar Arise con un botón, desde Estado o desde Más.',
+    'Si tu navegador no deja instalar con un toque, te mostramos cómo hacerlo.',
+  ] },
   { v: '2.1.1', fecha: '2026-10-16', items: [
     'Corregimos el aviso de novedades para que aparezca cuando la app se actualiza.',
     'Ya no se cierra solo si tocás la pantalla sin querer apenas se abre.',
