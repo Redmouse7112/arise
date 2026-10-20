@@ -1,6 +1,12 @@
 // Registro de cambios para quien usa la app. La entrada más nueva va primero.
 // Regla: en cada entrega, subir APP_VERSION (data.js) y sumar acá su entrada, en lenguaje simple.
 export const NOVEDADES = [
+  { v: '2.2.3', fecha: '2026-10-20', items: [
+    'La app ahora se llama Dankai (段階: "etapa" o "peldaño").',
+    'Estrenamos logo: tres escalones que suben, el último en dorado.',
+    'Tus datos y tus copias de seguridad siguen igual.',
+    'Las copias nuevas se llaman dankai-backup; las viejas también se pueden importar.',
+  ] },
   { v: '2.2.2', fecha: '2026-10-20', items: [
     'El descanso entre series arranca solo, y lo ajustás con −15 s, +15 s o Saltar.',
     'Ejercicios con tiempo: elegí la duración, pausá o reiniciá.',
@@ -19,7 +25,7 @@ export const NOVEDADES = [
     'Armá tus propias rutinas: creá, duplicá y ordená ejercicios desde Más → Rutinas.',
     'Creá tus propios ejercicios y cambiá series, repeticiones y descansos.',
     'Editar una rutina no cambia tus puntos ni tus días anteriores.',
-    'Arise te sugiere cuándo subir el peso de un ejercicio.',
+    'Dankai te sugiere cuándo subir el peso de un ejercicio.',
     'Si empezás de cero, elegís una rutina de ejemplo o empezás vacío.',
   ] },
   { v: '2.1.3', fecha: '2026-10-16', items: [
@@ -30,7 +36,7 @@ export const NOVEDADES = [
   ] },
   { v: '2.1.2', fecha: '2026-10-16', items: [
     'La ventana de novedades ahora aparece centrada en la pantalla.',
-    'Ya podés instalar Arise con un botón, desde Estado o desde Más.',
+    'Ya podés instalar Dankai con un botón, desde Estado o desde Más.',
     'Si tu navegador no deja instalar con un toque, te mostramos cómo hacerlo.',
   ] },
   { v: '2.1.1', fecha: '2026-10-16', items: [
@@ -52,7 +58,7 @@ export const NOVEDADES = [
     'Estado y Misión muestran cómo vas hoy con la comida y la lectura.',
   ] },
   { v: '1.0.0', fecha: '2026-10-15', items: [
-    'Primera versión de Arise: tu sistema de entrenamiento personal.',
+    'Primera versión de Dankai: tu sistema de entrenamiento personal.',
     'Misión del día con ejercicios, series, pesos y temporizadores de descanso.',
     'Nivel, XP, racha y cinturón para ver tu progreso.',
     'Funciona sin internet y tus datos quedan solo en tu dispositivo.',
