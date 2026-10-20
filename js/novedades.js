@@ -1,6 +1,9 @@
 // Registro de cambios para quien usa la app. La entrada más nueva va primero.
 // Regla: en cada entrega, subir APP_VERSION (data.js) y sumar acá su entrada, en lenguaje simple.
 export const NOVEDADES = [
+  { v: '2.2.4', fecha: '2026-10-20', items: [
+    'Mantenimiento: sin cambios visibles.',
+  ] },
   { v: '2.2.3', fecha: '2026-10-20', items: [
     'La app ahora se llama Dankai (段階: "etapa" o "peldaño").',
     'Estrenamos logo: tres escalones que suben, el último en dorado.',

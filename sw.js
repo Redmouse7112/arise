@@ -1,6 +1,6 @@
 // Service worker de Dankai: caché de la app para uso offline.
 // LEGADO: el prefijo "arise-" del caché es del nombre anterior; solo es un identificador (al activar se borran los cachés distintos de V; los datos no se tocan).
-const V = 'arise-v4-4';
+const V = 'arise-v4-5';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'css/base.css', 'css/ui.css',
   'js/app.js', 'js/data.js', 'js/store.js', 'js/xp.js', 'js/timer.js', 'js/ui.js', 'js/habitos.js', 'js/entreno.js', 'js/novedades.js', 'js/aviso.js', 'js/modal.js', 'js/instalar.js', 'js/rutinas.js', 'js/morph.js', 'js/imagen.js',
   'js/views/estado.js', 'js/views/hoy.js', 'js/views/plan.js', 'js/views/ejercicio.js', 'js/views/comida.js', 'js/views/lectura.js', 'js/views/mas.js', 'js/views/trote.js', 'js/views/clase.js', 'js/views/spar.js',

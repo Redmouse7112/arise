@@ -1,5 +1,5 @@
 // Datos estáticos de Dankai: cinturones, imágenes, ejercicios y sesiones.
-export const APP_VERSION = '2.2.3';
+export const APP_VERSION = '2.2.4';
 
 export const BELTS = [
   { id: 'blanco',   n: 'Blanco',   c: '#f1f5f9' },
