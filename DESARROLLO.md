@@ -1,4 +1,4 @@
-# Arise — contexto de desarrollo
+# Dankai — contexto de desarrollo
 
 App personal de entrenamiento de Javier ("RED"), 20 años, kickboxer (cinturón amarillo, rendido en agosto 2026; examen en marzo 2027), desarrollador y estudiante. PWA offline, estilo "sistema holográfico" inspirado en Solo Leveling pero con identidad propia (cinturones, rojo y dorado). Idioma de la interfaz y del código visible: español rioplatense.
 
@@ -10,6 +10,12 @@ App personal de entrenamiento de Javier ("RED"), 20 años, kickboxer (cinturón 
 - Entregar archivos completos y listos; el usuario itera con feedback puntual y pide explicaciones solo si las necesita.
 - Los datos viven solo en el dispositivo. Nada de servidores ni cuentas.
 - Los commits y pull requests son solo del autor del repositorio, sin firmas ni coautores.
+
+## Nombre y logo
+- La app se llama **Dankai** (段階: "etapa", "peldaño"; contiene "dan", el grado de cinturón). Antes se llamaba Arise.
+- **Prefijo legado `arise.`**: las claves de `localStorage` (`arise.v1`, `arise.v1.bak*`, `.preimport`, `.corrupto`, `arise.seen`, `arise.timer`, `arise.instalada`, `arise.instalar`) y el prefijo `arise-` del caché del service worker son identificadores internos del nombre anterior. **No se renombran**: hacerlo dejaría sin datos a las instalaciones existentes. El repositorio y la URL de GitHub Pages también siguen con `arise` hasta que se decida aparte.
+- Todo texto visible dice Dankai. Los archivos de copia son `dankai-backup-AAAA-MM-DD.json`; la importación no mira el nombre, así que sigue aceptando los `arise-*.json` viejos. El nombre con kanji se muestra en Ajustes → Acerca de con la fuente japonesa del sistema (`.kanji`); no se incluyen fuentes CJK.
+- Logo provisional (propio): tres escalones que suben de izquierda a derecha (peldaños = 段階), los dos primeros en rojo brasa (degradado de oscuro abajo a brillante arriba, `#5c0e08` → `#ff4d2b`) y el tercero en dorado (`#a8740f` → `#ffd45e`) con una franja fina dorada (`#fbbf24`) encima, como un grado. Esquinas superiores redondeadas, sobre el fondo oscuro de la app (`#0a1630` → `#050b18`), sin texto ni arcos. Se generó con un script de desarrollo que no está en el repositorio (Pillow, supermuestreo ×3 y reducción); salidas: `icons/icon-192.png`, `icon-512.png`, `maskable-512.png`, `apple-touch-icon.png` (180, sin transparencia) e `img/logo.webp`.
 
 ## Estructura
 ```
