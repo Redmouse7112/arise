@@ -1,4 +1,4 @@
-// Ejercicio "Clase en Spartans": tipo de clase, esfuerzo y notas.
+// Ejercicio "Clase": tipo de clase, esfuerzo y notas. El nombre y el logo del dojo los configura el usuario en Ajustes.
 import { get, ymd, entry, save, exFor } from '../store.js';
 import { DOJO_TYPES, dojoDay, saveDojo, delDojo, attendance } from '../entreno.js';
 import { exHead, exNav, feelHTML, feelBind, esc } from '../ui.js';
@@ -18,7 +18,8 @@ export function render(root, ctx) {
     <section class="panel sc"><div class="grid2" style="gap:10px">
       <div class="stat"><div class="up">Esta semana</div><b class="num">${a.week}</b></div>
       <div class="stat"><div class="up">Este mes</div><b class="num">${a.month}</b></div></div>
-      <p class="mut" style="font-size:.78rem;text-align:center;margin:8px 0 0">Asistencias a clase</p></section>
+      <p class="mut" style="font-size:.78rem;text-align:center;margin:8px 0 0">Asistencias a clase</p>
+      ${S.dojo.logo ? `<div style="text-align:center;margin-top:10px"><img src="${esc(S.dojo.logo)}" alt="Logo del dojo" style="max-width:96px;max-height:96px;border-radius:10px"></div>` : ''}</section>
     ${editing ? `<section class="panel sc">
       <div class="up" style="margin-bottom:8px">Tipo de clase</div>
       <div class="chips" style="margin-top:0">${DOJO_TYPES.map((t) => `<button class="chip-b ${t === type ? 'sel' : ''}" data-t="${esc(t)}"><b>${esc(t)}</b></button>`).join('')}</div>
