@@ -1,6 +1,13 @@
 // Registro de cambios para quien usa la app. La entrada más nueva va primero.
 // Regla: en cada entrega, subir APP_VERSION (data.js) y sumar acá su entrada, en lenguaje simple.
 export const NOVEDADES = [
+  { v: '2.2.1', fecha: '2026-10-20', items: [
+    'Elegí qué módulos usar: gym, calistenia, trote, comida, lectura y artes marciales.',
+    'Si ocultás un módulo, tus datos quedan guardados.',
+    'Poné el nombre y el logo de tu dojo en Ajustes.',
+    'La pantalla ya no parpadea cuando cargás datos.',
+    'Si tus datos son de una versión más nueva, la app te avisa y no los pisa.',
+  ] },
   { v: '2.2.0', fecha: '2026-10-16', items: [
     'Armá tus propias rutinas: creá, duplicá y ordená ejercicios desde Más → Rutinas.',
     'Creá tus propios ejercicios y cambiá series, repeticiones y descansos.',
@@ -27,7 +34,7 @@ export const NOVEDADES = [
   { v: '2.1.0', fecha: '2026-10-16', items: [
     'Trote con intervalos: elegí 1:1, 2:1, 3:1 o armá el tuyo, y la app te avisa cuándo cambiar.',
     'Nueva sesión de Calistenia, que podés elegir desde Misión o Plan.',
-    'Clase en Spartans: anotá el tipo de clase, el esfuerzo y ves tus asistencias.',
+    'Clase en tu dojo: anotá el tipo de clase, el esfuerzo y ves tus asistencias.',
     'Sparring con rondas de 3 minutos y un diario para anotar qué salió bien y qué trabajar.',
     'Nueva pestaña Más con el Plan, el diario y el historial de trote.',
   ] },

@@ -1,9 +1,9 @@
 // Service worker de Arise: cache de la app para uso offline.
-const V = 'arise-v4-1';
+const V = 'arise-v4-2';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'css/base.css', 'css/ui.css',
-  'js/app.js', 'js/data.js', 'js/store.js', 'js/xp.js', 'js/timer.js', 'js/ui.js', 'js/habitos.js', 'js/entreno.js', 'js/novedades.js', 'js/aviso.js', 'js/modal.js', 'js/instalar.js', 'js/rutinas.js',
+  'js/app.js', 'js/data.js', 'js/store.js', 'js/xp.js', 'js/timer.js', 'js/ui.js', 'js/habitos.js', 'js/entreno.js', 'js/novedades.js', 'js/aviso.js', 'js/modal.js', 'js/instalar.js', 'js/rutinas.js', 'js/morph.js', 'js/imagen.js',
   'js/views/estado.js', 'js/views/hoy.js', 'js/views/plan.js', 'js/views/ejercicio.js', 'js/views/comida.js', 'js/views/lectura.js', 'js/views/mas.js', 'js/views/trote.js', 'js/views/clase.js', 'js/views/spar.js',
-  'js/views/diario.js', 'js/views/historial.js', 'js/views/novedades.js', 'js/views/rutinas.js', 'js/views/inicio.js',
+  'js/views/diario.js', 'js/views/historial.js', 'js/views/novedades.js', 'js/views/rutinas.js', 'js/views/inicio.js', 'js/views/bloqueo.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png',
   'img/logo.webp', 'img/sec-gym.webp', 'img/sec-calistenia.webp', 'img/sec-trote.webp', 'img/sec-sparring.webp',
   'img/sec-comida.webp', 'img/sec-cuerpo.webp', 'img/sec-lectura.webp', 'img/sec-dojo.webp',
