@@ -21,6 +21,7 @@ const defaults = () => ({
   v: SCHEMA,
   profile: { belt: 'amarillo', since: '2026-08', exam: '2027-03-01' },
   mods: { gym: true, cal: true, trote: true, comida: true, lectura: true, artes: true },   // módulos visibles; apagar uno solo lo oculta
+  ajustes: { descansoAuto: true },   // opcional y aditivo: descanso automático al marcar una serie
   setup: 'pendiente',  // 'pendiente' hasta que una instalación nueva elige rutina de ejemplo o vacío
   routines: R.rutinasBase(),   // [{ id, n, color, img, bonus, ex: [ids] }]
   exo: {},             // ediciones de ejercicios base: id -> { n, sets, reps, rest, dur, note, inc }
@@ -47,6 +48,7 @@ function migrate(o) {
     read: { ...d.read, ...o.read, books: [...((o.read && o.read.books) || [])], log: { ...(o.read && o.read.log) }, gl: { ...(o.read && o.read.gl) } },
     run: { log: { ...(o.run && o.run.log) } },
     mods: { ...d.mods, ...o.mods },
+    ajustes: { ...d.ajustes, ...o.ajustes },
     dojo: { ...d.dojo, ...o.dojo, log: { ...(o.dojo && o.dojo.log) } },
     spar: { log: [...((o.spar && o.spar.log) || [])] },
   };

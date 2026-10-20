@@ -1,5 +1,5 @@
 // Datos estáticos de Arise: cinturones, imágenes, ejercicios y sesiones.
-export const APP_VERSION = '2.2.1';
+export const APP_VERSION = '2.2.2';
 
 export const BELTS = [
   { id: 'blanco',   n: 'Blanco',   c: '#f1f5f9' },
@@ -64,6 +64,11 @@ export const EX = {
   spar:     E('spar', 'Sparring', { type: 'check', xp: 80, muscle: 'cardio' }),
   descanso: E('descanso', 'Descanso y recuperación', { type: 'check', xp: 40, muscle: 'cardio', note: 'Dormir, comer bien e hidratarte también es entrenar.' }),
 };
+
+// Descanso por defecto entre series (s): compuestos 120, accesorios 90, aislamiento y calistenia 60. Se edita por ejercicio en Rutinas.
+const DESCANSO = { jalon: 120, remo: 120, pressmil: 120, banca: 120, rdl: 120, split: 120, dominadas: 120, puente: 90, fondos: 90, remoinv: 90,
+  facepull: 60, laterales: 60, curl: 60, farmer: 60, gemelos: 60, crunch: 60, piernas: 60, flexiones: 60, piernascol: 60 };
+for (const [id, r] of Object.entries(DESCANSO)) EX[id].rest = r;
 
 export const SESS = {
   gym1: { n: 'Gym 1 · Tirón y hombros', mod: 'gym', img: 'gym', color: '#38bdf8', bonus: 60,

@@ -69,6 +69,9 @@ export function render(root, ctx) {
     <p class="mut" style="font-size:.8rem;margin:0 0 4px">Se ocultan, tus datos quedan guardados.</p>
     ${MODULOS.map((m) => `<label class="row li"><div style="flex:1;min-width:0"><div class="t">${m.n}</div><div class="mut" style="font-size:.78rem">${m.d}</div></div>
       <input type="checkbox" data-mod="${m.k}" aria-label="${m.n}" ${modActivo(m.k) ? 'checked' : ''}></label>`).join('')}
+    <div class="up" style="margin:16px 0 2px;color:var(--ink)">Temporizadores</div>
+    <label class="row li"><div style="flex:1;min-width:0"><div class="t">Descanso automático</div><div class="mut" style="font-size:.78rem">Arranca solo al marcar una serie (no después de la última).</div></div>
+      <input type="checkbox" id="descAuto" aria-label="Descanso automático" ${S.ajustes.descansoAuto !== false ? 'checked' : ''}></label>
     ${artes ? `<div class="up" style="margin:16px 0 2px;color:var(--ink)">Artes marciales</div>
     <table class="tbl">
       <tr><td>Cinturón</td><td><select class="s" id="belt">${BELTS.map((b) => `<option value="${b.id}" ${b.id === belt.id ? 'selected' : ''}>${b.n}</option>`).join('')}</select></td></tr>
@@ -95,6 +98,7 @@ export function render(root, ctx) {
     if (!setMod(c.dataset.mod, c.checked)) { c.checked = true; ctx.toast('Tiene que quedar al menos un módulo activo'); return; }
     ctx.refresh();
   }));
+  on('#descAuto', 'change', (e) => { S.ajustes.descansoAuto = e.target.checked; save(); ctx.refresh(); });
   on('#belt', 'change', (e) => { S.profile.belt = e.target.value; save(); ctx.refresh(); });
   on('#since', 'change', (e) => { S.profile.since = e.target.value; save(); });
   on('#exam', 'change', (e) => { S.profile.exam = e.target.value; save(); ctx.refresh(); });
