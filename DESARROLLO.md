@@ -29,7 +29,7 @@ js/novedades.js       registro de cambios para el usuario (NOVEDADES); js/aviso.
 js/modal.js           ventana pequeña centrada reutilizable (`abrirModal`)
 js/morph.js           actualiza #view por diferencias (sin parpadeo); js/imagen.js: reducir imagen a 256 px
 js/instalar.js        botón de instalación (beforeinstallprompt), pasos para iOS y ayuda por navegador
-js/timer.js           cuenta regresiva / cronómetro con horas absolutas
+js/timer.js           motor común de temporizadores (descanso, ejercicio con tiempo, rondas, lectura) con horas absolutas
 js/ui.js              helpers de vistas
 js/views/*.js         estado, hoy, comida, lectura, mas, plan, ejercicio, novedades,
                       historial (trote), diario (sparring), rutinas, inicio (primera vez), bloqueo (datos más nuevos);
@@ -52,6 +52,15 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Aparte del estado principal: `arise.seen` (última versión de novedades vista) y `arise.timer` (temporizador activo).
 - Migración v3 → v4 (`rutinas.js` `aV4`): copia `SESS` a `routines` (mismos ids) y congela cada día existente desde las definiciones de ese momento; el XP, el nivel y la racha no cambian (verificado antes/después con datos de ejemplo). Se guarda `arise.v1.bak3` antes.
 - Cambios de esquema: subir `v` y migrar en `load()`; nunca romper datos existentes.
+
+## Temporizadores
+- Un solo motor, `js/timer.js` (no hay un `temporizador.js` aparte: ya cumplía el papel). Modos `down` (cuenta regresiva), `up` (cronómetro) y `phases` (fases con nombre y duración: trote por intervalos y rondas de artes marciales). Todo se calcula contra `Date.now()`, nunca sumando segundos; el estado en curso vive en `localStorage['arise.timer']`. Al volver a la app (`visibilitychange`) se recalcula (`recalcular()`); un temporizador que venció con la app cerrada avisa su fin una vez con `late: true` y sin sonido (por ejemplo, tilda el ejercicio o suma los minutos de lectura).
+- Pantalla encendida con Wake Lock (try/catch), sonido por Web Audio generado por código (pitidos y `campana`) con `resume()` tras un gesto, vibración solo si existe `navigator.vibrate` (el iPhone no vibra: no prometerla en textos).
+- Fases: `{ label, ms, round?, rounds?, warn?, in?, out? }`. `warn` avisa cuando faltan esos ms; `in/out: 'campana'` suena al empezar o terminar la fase.
+- Descanso entre series: arranca solo al marcar una serie (no la última) si "Descanso automático" (`S.ajustes.descansoAuto`, por defecto activo) está encendido; en la barra: −15 s, +15 s y Saltar. Valor por defecto según el tipo (`DESCANSO` en `data.js`: compuestos 120 s, accesorios 90 s, aislamiento y calistenia 60 s), editable por ejercicio en Rutinas.
+- Ejercicios con tiempo: preajustes de duración (30 s a 20 min), Iniciar, Pausar, Reiniciar; al terminar, sonido y tilde automático.
+- Tilde automático: un ejercicio se tilda solo al marcar la última serie o al terminar su temporizador; el aviso de unos 5 s trae "Deshacer" (`ctx.commit(accion)`), que revierte el tilde y, como el XP se calcula desde el registro, también su XP. El tilde manual sigue siempre.
+- Rondas (sparring): `prefs.spar = { rounds, dur, rest, pre, warn }` (opcional); presets Kickboxing 3 × 2:00 y Boxeo 3 × 3:00 con descanso de 1:00, o personalizado; cuenta previa de 10 s y aviso a los 10 s finales. Al guardar, `spar.log[]` suma `dur` y `rest`, y `log[fecha].ex.spar` suma `rondas`, `dur` y `rest` (campos opcionales y aditivos; el esquema sigue en v4).
 
 ## Módulos activables
 - Los módulos son `gym`, `cal`, `trote`, `comida`, `lectura` y `artes` (`MODULOS` en `data.js`). Apagar uno **solo lo oculta**: no borra datos, XP ni historial, y el XP, el nivel y la racha de días pasados no cambian (se calculan desde `log[fecha].f`, comida y lectura, sin mirar los módulos). Siempre queda al menos uno activo.
@@ -139,6 +148,9 @@ En cada entrega: subir `APP_VERSION` según esta regla y agregar su entrada arri
 
 **2.2.1 (hecha)**
 - Módulos activables (selector en la primera vez y en Ajustes), nombre y logo del dojo configurables, emblema genérico del dojo, dibujado por diferencias sin parpadeo y protección ante datos de una versión más nueva.
+
+**2.2.2 (hecha)**
+- Temporizadores completos: descanso automático con −15 s / +15 s / Saltar y ajuste global, ejercicios con tiempo con preajustes y Reiniciar, tilde automático con Deshacer, rondas de artes marciales con presets, cuenta previa y campana, y aviso de fin tras reabrir la app.
 
 **V3**
 - Cuerpo: peso, medidas y fotos de progreso (IndexedDB) con gráficos simples.
