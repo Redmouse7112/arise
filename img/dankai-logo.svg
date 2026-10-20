@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Dankai (段階) · logo provisional · FUENTE DE VERDAD.
+     Para cambiarlo: editar este archivo y correr `python tools/make-icons.py` (ver el comentario al inicio del script).
+     El script lee de acá los colores (variables de abajo), las formas de #escalones, los degradados y el brillo. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Dankai: tres escalones que suben, el último dorado">
+  <style>
+    svg {
+      --fondo-arriba: #0a1630;
+      --fondo-abajo: #050b18;
+      --rojo-oscuro: #5c0e08;
+      --rojo-claro: #ff4d2b;
+      --oro-oscuro: #a8740f;
+      --oro-claro: #ffd45e;
+      --oro: #fbbf24;
+    }
+  </style>
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color: var(--fondo-arriba)"/><stop offset="1" style="stop-color: var(--fondo-abajo)"/>
+    </linearGradient>
+    <linearGradient id="rojo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color: var(--rojo-claro)"/><stop offset="1" style="stop-color: var(--rojo-oscuro)"/>
+    </linearGradient>
+    <linearGradient id="dorado" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color: var(--oro-claro)"/><stop offset="1" style="stop-color: var(--oro-oscuro)"/>
+    </linearGradient>
+    <filter id="difuso" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="34"/></filter>
+    <!-- Los escalones: 1 y 2 rojos, el 3 dorado (el grado alcanzado), más la franja de grado encima -->
+    <g id="escalones">
+      <path id="paso1" fill="url(#rojo)" d="M240,628 A24,24 0 0 1 264,604 H392 A24,24 0 0 1 416,628 V780 H264 A24,24 0 0 1 240,756 Z"/>
+      <path id="paso2" fill="url(#rojo)" d="M424,488 A24,24 0 0 1 448,464 H576 A24,24 0 0 1 600,488 V780 H424 Z"/>
+      <path id="paso3" fill="url(#dorado)" d="M608,348 A24,24 0 0 1 632,324 H760 A24,24 0 0 1 784,348 V756 A24,24 0 0 1 760,780 H608 Z"/>
+      <rect id="franja" x="592" y="278" width="208" height="14" rx="7" style="fill: var(--oro)"/>
+    </g>
+  </defs>
+  <rect id="fondo-rect" width="1024" height="1024" fill="url(#fondo)"/>
+  <use id="brillo" href="#escalones" filter="url(#difuso)" opacity="0.35"/>
+  <use href="#escalones"/>
+</svg>
