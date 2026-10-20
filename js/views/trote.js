@@ -104,7 +104,7 @@ export function render(root, ctx) {
 
   function paintControls(v) {
     const tb = q('#tb'); if (!tb) return;
-    if (!tb.dataset.s || tb.dataset.s !== `${v.paused}`) {
+    if (!tb.dataset.s || tb.dataset.s !== `${v.paused}` || !tb.childElementCount) {
       tb.dataset.s = `${v.paused}`;
       tb.innerHTML = `<button class="btn" id="pp">${v.paused ? 'Seguir' : 'Pausa'}</button><button class="btn" id="p30">+30 s</button>
         <button class="btn pri" id="end">Terminar</button><button class="btn ghost" id="stp">Cancelar</button>`;
