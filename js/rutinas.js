@@ -1,6 +1,6 @@
 // Rutinas y ejercicios del usuario: funciones puras que reciben el estado S (sin tocar localStorage).
 // store.js las expone ya atadas al estado real. Los ejercicios base de data.js son los valores por defecto.
-import { EX, SESS } from './data.js';
+import { EX, SESS, MOD_BASE } from './data.js';
 
 export const INC = 2.5;                       // incremento de peso por defecto (kg)
 const EDITABLES = ['n', 'sets', 'reps', 'rest', 'dur', 'note', 'inc'];   // lo único que se puede editar de un ejercicio base
@@ -10,7 +10,10 @@ const CONGELADO = ['id', 'n', 'type', 'xp', 'sets', 'reps', 'rl', 'rest', 'dur',
 export const xpCustom = (c) => (c.type === 'sets' ? 25 : c.type === 'timed' ? Math.max(10, Math.min(40, Math.round(10 + ((c.dur || 0) / 60 - 5) * 2))) : 30);
 
 // Rutinas iniciales: las sesiones de data.js (mismos ids, así el plan guardado sigue valiendo).
-export const rutinasBase = () => Object.entries(SESS).map(([id, s]) => ({ id, n: s.n, color: s.color, img: s.img, bonus: s.bonus, ex: [...s.ex] }));
+export const rutinasBase = () => Object.entries(SESS).map(([id, s]) => ({ id, n: s.n, ...(s.mod ? { mod: s.mod } : {}), color: s.color, img: s.img, bonus: s.bonus, ex: [...s.ex] }));
+
+// Módulo al que pertenece una rutina ('' = ninguno, como el descanso). Las rutinas sin `mod` (anteriores a 2.2.1) se deducen del id.
+export const modOf = (r) => r.mod ?? MOD_BASE[r.id] ?? (r.ex.length === 1 && r.ex[0] === 'descanso' ? '' : 'gym');
 
 // Definición vigente de un ejercicio (base + ediciones, o propio). null si no existe.
 export function defOf(S, id) {
@@ -19,12 +22,15 @@ export function defOf(S, id) {
     const o = S.exo[id] || {}, d = { ...b, id };
     for (const k of EDITABLES) if (o[k] !== undefined) d[k] = o[k];
     d.inc = d.inc ?? INC;
+    if (id === 'clase' && o.n === undefined) d.n = nombreClase(S);   // la clase se llama como el dojo que configuró el usuario
     return d;
   }
   const c = S.custom[id];
   if (!c) return null;
   return { id, n: c.n, type: c.type, muscle: c.muscle, sets: c.sets, reps: c.reps, rl: 'reps', rest: c.rest, dur: c.dur, note: c.note || '', xp: xpCustom(c), inc: c.inc ?? INC, custom: true };
 }
+// "Clase" si el dojo no tiene nombre, "Clase en {nombre}" si lo tiene.
+export const nombreClase = (S) => { const n = ((S.dojo && S.dojo.nombre) || '').trim(); return n ? `Clase en ${n}` : 'Clase'; };
 export const biblioteca = (S) => [...Object.keys(EX), ...Object.keys(S.custom)].map((id) => defOf(S, id)).filter(Boolean);
 export const routineOf = (S, id) => S.routines.find((r) => r.id === id) || null;
 // Un día de descanso planificado es una rutina que solo tiene el ejercicio "descanso".
@@ -47,10 +53,14 @@ export function congelar(S, rid) {
 
 // Sesión de un día para mostrar: la congelada si el día ya tiene registro, si no la rutina vigente.
 // En la congelada mandan sus valores y los datos que solo sirven para mostrar (nota, paso) salen de la definición vigente.
-export function sesionDia(S, date, sid) {
+// `activo(r)` dice si el módulo de la rutina está encendido; un día sin registro con rutina de un módulo apagado no tiene sesión.
+export function sesionDia(S, date, sid, activo) {
   const L = S.log[date];
-  if (L && L.f) return { ...L.f, id: L.s, ex: L.f.ex.map((e) => ({ ...(defOf(S, e.id) || {}), ...e })) };
+  if (L && L.f) {
+    return { ...L.f, id: L.s, ex: L.f.ex.map((e) => { const v = defOf(S, e.id) || {}; return { ...v, ...e, ...(e.id === 'clase' && v.n ? { n: v.n } : {}) }; }) };
+  }
   const r = routineOf(S, sid);
+  if (r && activo && !activo(r)) return null;
   return r ? { id: r.id, n: r.n, color: r.color, img: r.img, bonus: r.bonus, ex: r.ex.map((id) => defOf(S, id)).filter(Boolean) } : null;
 }
 
@@ -89,13 +99,13 @@ export function bonusPara(S, ids) {
   const n = ids.map((id) => defOf(S, id)).filter((d) => d && !d.opt).length;
   return n >= 2 ? Math.min(60, 10 + 5 * n) : 0;
 }
-export function nuevaRutina(S, n, color, img) {
-  const r = { id: nuevoId('r_'), n, color, img, bonus: 0, ex: [] };
+export function nuevaRutina(S, n, color, img, mod = 'gym') {
+  const r = { id: nuevoId('r_'), n, mod, color, img, bonus: 0, ex: [] };
   S.routines.push(r); return r;
 }
 export function duplicarRutina(S, id) {
   const o = routineOf(S, id); if (!o) return null;
-  const r = { ...o, id: nuevoId('r_'), n: o.n + ' (copia)', ex: [...o.ex] };
+  const r = { ...o, id: nuevoId('r_'), mod: modOf(o), n: o.n + ' (copia)', ex: [...o.ex] };
   S.routines.splice(S.routines.indexOf(o) + 1, 0, r); return r;
 }
 export const diasEnPlan = (S, id) => S.plan.map((p, d) => (p === id ? d : -1)).filter((d) => d >= 0);

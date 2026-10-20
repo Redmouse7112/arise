@@ -1,5 +1,5 @@
 // Datos estáticos de Arise: cinturones, imágenes, ejercicios y sesiones.
-export const APP_VERSION = '2.2.0';
+export const APP_VERSION = '2.2.1';
 
 export const BELTS = [
   { id: 'blanco',   n: 'Blanco',   c: '#f1f5f9' },
@@ -60,21 +60,21 @@ export const EX = {
   plancha:  E('plancha', 'Plancha', { type: 'timed', dur: 45, step: 15, rounds: 3, xp: 25, muscle: 'core', note: 'Hacé 3 series de 45 s, con 45 s de descanso entre una y otra. Repetí el temporizador.' }),
   piernascol:E('piernascol', 'Elevación de piernas colgado', { reps: '8-12', rest: 60, muscle: 'core', note: 'Colgado de la barra, sin balancearte.' }),
   trote:    E('trote', 'Trote suave', { type: 'timed', dur: 1200, xp: 40, muscle: 'cardio', note: 'Ritmo en el que puedas hablar. Si estás muy cansado, caminá.' }),
-  clase:    E('clase', 'Clase en Spartans', { type: 'check', xp: 60, muscle: 'cardio' }),
+  clase:    E('clase', 'Clase', { type: 'check', xp: 60, muscle: 'cardio' }),
   spar:     E('spar', 'Sparring', { type: 'check', xp: 80, muscle: 'cardio' }),
   descanso: E('descanso', 'Descanso y recuperación', { type: 'check', xp: 40, muscle: 'cardio', note: 'Dormir, comer bien e hidratarte también es entrenar.' }),
 };
 
 export const SESS = {
-  gym1: { n: 'Gym 1 · Tirón y hombros', img: 'gym', color: '#38bdf8', bonus: 60,
+  gym1: { n: 'Gym 1 · Tirón y hombros', mod: 'gym', img: 'gym', color: '#38bdf8', bonus: 60,
           ex: ['bici', 'jalon', 'remo', 'pressmil', 'banca', 'facepull', 'laterales', 'curl', 'farmer', 'gemelos', 'crunch', 'piernas', 'biciFin'] },
-  gym2: { n: 'Gym 2 · Cadera y piernas', img: 'gym', color: '#38bdf8', bonus: 60,
+  gym2: { n: 'Gym 2 · Cadera y piernas', mod: 'gym', img: 'gym', color: '#38bdf8', bonus: 60,
           ex: ['bici', 'rdl', 'split', 'puente', 'farmer', 'gemelos', 'crunch', 'piernas', 'biciFin'] },
-  calistenia: { n: 'Calistenia', img: 'calistenia', color: '#a78bfa', bonus: 50,
+  calistenia: { n: 'Calistenia', mod: 'cal', img: 'calistenia', color: '#a78bfa', bonus: 50,
                 ex: ['dominadas', 'flexiones', 'fondos', 'remoinv', 'plancha', 'piernascol'] },
-  trote:{ n: 'Trote', img: 'trote', color: '#fbbf24', bonus: 15, ex: ['trote'] },
-  dojo: { n: 'Dojo · Spartans', img: 'dojo', color: '#fbbf24', bonus: 0, ex: ['clase'] },
-  sparring: { n: 'Sparring', img: 'sparring', color: '#ef4444', bonus: 0, ex: ['spar'] },
+  trote:{ n: 'Trote', mod: 'trote', img: 'trote', color: '#fbbf24', bonus: 15, ex: ['trote'] },
+  dojo: { n: 'Dojo', mod: 'artes', img: 'dojo', color: '#fbbf24', bonus: 0, ex: ['clase'] },
+  sparring: { n: 'Sparring', mod: 'artes', img: 'sparring', color: '#ef4444', bonus: 0, ex: ['spar'] },
   descanso: { n: 'Descanso', img: 'cuerpo', color: '#cbd5e1', bonus: 0, ex: ['descanso'] },
 };
 
@@ -89,3 +89,15 @@ export const SEED_LAST = {
 };
 
 export const TITLES = [[1, 'Aspirante'], [5, 'Peleador'], [10, 'Guerrero'], [15, 'Espartano'], [25, 'Maestro']];
+
+// Módulos que se pueden activar o apagar. Apagar uno solo lo oculta de la interfaz: nunca borra datos.
+export const MODULOS = [
+  { k: 'gym', n: 'Gym', d: 'Rutinas de pesas con series, repeticiones y pesos.' },
+  { k: 'cal', n: 'Calistenia', d: 'Ejercicios con tu propio peso: dominadas, flexiones, plancha.' },
+  { k: 'trote', n: 'Trote', d: 'Trote continuo o por intervalos, con distancia e historial.' },
+  { k: 'comida', n: 'Comida', d: 'La proteína del día contra tu meta, con alimentos rápidos.' },
+  { k: 'lectura', n: 'Lectura', d: 'Tus libros y las páginas que leés cada día.' },
+  { k: 'artes', n: 'Artes marciales', d: 'Clases de tu dojo, sparring con diario y cinturón.' },
+];
+export const TRABAJO = ['gym', 'cal', 'trote', 'artes'];   // los que dan sesiones: si todos están apagados, no hay Misión
+export const MOD_BASE = { gym1: 'gym', gym2: 'gym', calistenia: 'cal', trote: 'trote', dojo: 'artes', sparring: 'artes' };   // módulo de las rutinas base (descanso no tiene)
