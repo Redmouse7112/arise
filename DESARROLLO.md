@@ -27,18 +27,21 @@ js/habitos.js         datos de Comida y Lectura (proteína, libros, páginas, XP
 js/entreno.js         datos de trote, dojo y diario de sparring; sin interfaz
 js/novedades.js       registro de cambios para el usuario (NOVEDADES); js/aviso.js: ventana de novedades
 js/modal.js           ventana pequeña centrada reutilizable (`abrirModal`)
+js/morph.js           actualiza #view por diferencias (sin parpadeo); js/imagen.js: reducir imagen a 256 px
 js/instalar.js        botón de instalación (beforeinstallprompt), pasos para iOS y ayuda por navegador
 js/timer.js           cuenta regresiva / cronómetro con horas absolutas
 js/ui.js              helpers de vistas
 js/views/*.js         estado, hoy, comida, lectura, mas, plan, ejercicio, novedades,
-                      historial (trote), diario (sparring); pantallas propias de ejercicio: trote, clase, spar
+                      historial (trote), diario (sparring), rutinas, inicio (primera vez), bloqueo (datos más nuevos);
+                      pantallas propias de ejercicio: trote, clase, spar
 img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 ```
 
-## Modelo de datos (`localStorage['arise.v1']`, esquema `v: 3`)
+## Modelo de datos (`localStorage['arise.v1']`, esquema `v: 4`)
 - `profile {belt, since, exam}`; `plan[0..6]` (domingo=0) con id de rutina (`''` = sin rutina); `over[fecha]` rutina elegida para ese día.
 - `routines [{id, n, color, img, bonus, ex:[ids]}]`: las rutinas son datos del usuario (se siembran desde `SESS`). `bonus` no se edita: sale de la cantidad de ejercicios obligatorios (`bonusPara`).
 - `exo {id: {n, sets, reps, rest, dur, note, inc}}`: ediciones de ejercicios base (solo las diferencias; `data.js` queda como valor por defecto). `custom {c_<timestamp>: {id, n, type, muscle, sets, reps, rest, dur, note, inc}}`: ejercicios propios. El XP no es editable: los base conservan `xp`, los propios salen del tipo (`xpCustom`: sets 25, check 30, timed 10 a 40 según minutos).
+- `mods {gym, cal, trote, comida, lectura, artes}`: módulos visibles (opcional y aditivo: si falta o una clave falta, está activo). `dojo {log, nombre, logo}`: `log` es el registro de clases; `nombre` y `logo` (data URL de hasta 256 px) los carga el usuario en Ajustes y nunca se migran solos. Las rutinas pueden traer `mod` (opcional; sin él se deduce del id con `MOD_BASE`, y el descanso no tiene módulo).
 - `setup`: `'pendiente'` en una instalación nueva hasta elegir "rutina de ejemplo" o "vacío" (`views/inicio.js`); las instalaciones existentes migran con `'listo'`.
 - `log[fecha] = { s: rutina, f: copia congelada, ex: { id: { sets:[{w,r,d}], n, done, t } } }`. **Regla del congelado:** la primera vez que se toca un día (`entry`), `f` guarda la sesión de ese día (`n`, `bonus`, `color`, `img` y por ejercicio `id, n, type, xp, sets, reps, rl, rest, dur, opt, muscle`). El XP, la racha y "sesión completa" (`dayStats`) leen SOLO de `f`, nunca de las rutinas vivas, así que editar rutinas o ejercicios no altera el pasado. Un día con registro no se vuelve a congelar, salvo que el usuario elija otra rutina para hoy (`setSession`).
 - `last[id] = {w, r}` últimos valores; `prefs[id] = {dur, rest}` tiempos editados.
@@ -49,6 +52,18 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Aparte del estado principal: `arise.seen` (última versión de novedades vista) y `arise.timer` (temporizador activo).
 - Migración v3 → v4 (`rutinas.js` `aV4`): copia `SESS` a `routines` (mismos ids) y congela cada día existente desde las definiciones de ese momento; el XP, el nivel y la racha no cambian (verificado antes/después con datos de ejemplo). Se guarda `arise.v1.bak3` antes.
 - Cambios de esquema: subir `v` y migrar en `load()`; nunca romper datos existentes.
+
+## Módulos activables
+- Los módulos son `gym`, `cal`, `trote`, `comida`, `lectura` y `artes` (`MODULOS` en `data.js`). Apagar uno **solo lo oculta**: no borra datos, XP ni historial, y el XP, el nivel y la racha de días pasados no cambian (se calculan desde `log[fecha].f`, comida y lectura, sin mirar los módulos). Siempre queda al menos uno activo.
+- Qué se oculta: Estado (tarjetas de proteína y lectura, "Hoy" y "Esta semana" si no hay Misión, cinturón y examen sin `artes`), la barra inferior (Comida y Lectura; Misión solo si gym, cal, trote y artes están todos apagados), Más (Plan y Rutinas sin Misión; Diario de sparring sin `artes`; Historial de trote sin `trote`) y Plan (las rutinas de un módulo apagado no se ofrecen; si un día ya tiene una, se ve bloqueada). Las pantallas de un módulo apagado redirigen a Estado.
+- Misión y racha: cada rutina pertenece a un módulo (`modOf`). **Hoy y los días futuros**: si la rutina planificada es de un módulo apagado, ese día no tiene sesión (Misión muestra "Hoy no tenés rutina" con las rutinas activas para elegir). Si hoy ya tiene registro, esa sesión se sigue mostrando y su XP cuenta. **Días pasados**: intactos (están congelados). La racha no se pausa por apagar módulos: un día sin sesión completa la corta como siempre, salvo los descansos planificados (el descanso no tiene módulo, así que sigue valiendo). Comida y lectura siguen sumando su XP aunque estén ocultas.
+- Primera vez: `views/inicio.js` pide elegir módulos y después ejemplo / vacío / importar; el ejemplo se guarda completo y los módulos apagados solo lo ocultan.
+
+## Dibujado sin parpadeo
+- `ctx.refresh()` vuelve a ejecutar la vista de la pantalla actual, pero `js/morph.js` aplica el HTML por diferencias sobre `#view`: los nodos que no cambian se conservan (foco, scroll, valores a medio escribir). La primera asignación de `innerHTML` tras navegar (`pantallaNueva`) reemplaza todo; las siguientes, incluidos los redibujos internos de una vista, se aplican por diferencias. Al reutilizar un nodo se sueltan sus listeners para que la vista enlace los nuevos: las vistas deben volver a enlazar todo después de cada `innerHTML`.
+
+## Protección de datos
+- Si lo guardado tiene un esquema mayor al de este código (`v > SCHEMA`), `store.js` no sobrescribe nada: `save()` no escribe y se muestra `views/bloqueo.js` (con descarga de lo guardado). Si el JSON está dañado se copia a `arise.v1.corrupto` antes de seguir. Antes de migrar se guarda `arise.v1.bak<versión>` y antes de importar una copia, `arise.v1.preimport`. Los campos nuevos opcionales (`mods`, `dojo.nombre/logo`, `mod` en rutinas) son aditivos y no suben el esquema.
 
 ## Reglas de XP
 - Ejercicio hecho: `ex.xp` (25 normal, 15-40 cardio, 60 clase, 80 sparring, 40 descanso).
@@ -110,7 +125,7 @@ En cada entrega: subir `APP_VERSION` según esta regla y agregar su entrada arri
 **V2b (hecha, v2.1.0)**
 - Trote continuo e intervalos (1:1×10, 2:1×8, 3:1×6, personalizado) con registro de km y sensación; historial.
 - Sesión Calistenia (elegible en Plan y Misión; no está en el plan base). Plancha es `timed` con `step` de 15 s.
-- Clase en Spartans con tipo, esfuerzo y notas; asistencias de semana y mes.
+- Clase en el dojo con tipo, esfuerzo y notas; asistencias de semana y mes.
 - Sparring: rondas 3 min + 1 min de descanso con aviso a los 10 s; diario editable; "A trabajar" arriba en Misión el día de sparring.
 - Barra de 5 ítems (Estado, Misión, Comida, Lectura, Más); `#/mas` lleva a Plan, Diario, Historial de trote, Ajustes y Novedades.
 - Ventana de novedades y versión de la app (Estado → Ajustes).
@@ -121,6 +136,9 @@ En cada entrega: subir `APP_VERSION` según esta regla y agregar su entrada arri
 - Sugerencia de peso en ejercicios con series: si la última vez se completaron todas las series en el tope de repeticiones, propone subir `inc` kg (2,5 por defecto; 1 en laterales y curl) con botón "Aplicar".
 - Primera vez: elegir rutina de ejemplo o empezar vacío.
 - Pendiente menor: la racha de días pasados sin registro depende del plan vigente para reconocer descansos planificados.
+
+**2.2.1 (hecha)**
+- Módulos activables (selector en la primera vez y en Ajustes), nombre y logo del dojo configurables, emblema genérico del dojo, dibujado por diferencias sin parpadeo y protección ante datos de una versión más nueva.
 
 **V3**
 - Cuerpo: peso, medidas y fotos de progreso (IndexedDB) con gráficos simples.
