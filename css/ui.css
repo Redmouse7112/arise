@@ -170,3 +170,6 @@ body.setup #nav, body.setup #tbar { display: none; }
 
 #toast.act { pointer-events: auto; }
 .toastbtn { margin-left: 12px; padding: 2px 4px; font-weight: 700; color: var(--acc); text-decoration: underline; }
+
+/* Kanji: fuente japonesa del sistema, solo para el nombre en Acerca de */
+.kanji { font-family: "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Meiryo", "Noto Sans CJK JP", "Noto Sans JP", "PingFang SC", system-ui, sans-serif; }

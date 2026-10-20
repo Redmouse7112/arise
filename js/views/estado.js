@@ -34,7 +34,7 @@ export function render(root, ctx) {
 
   <section class="panel">
     <div class="hero">
-      <img src="${IMG.logo}" alt="Arise">
+      <img src="${IMG.logo}" alt="Dankai">
       <div>
         <div class="up">Nivel</div>
         <div class="lvl num">${L.lvl} <span style="font-size:1rem;color:var(--ink);letter-spacing:.1em">· ${L.title.toUpperCase()}</span></div>
@@ -82,14 +82,16 @@ export function render(root, ctx) {
         <label class="btn sm">${S.dojo.logo ? 'Cambiar' : 'Elegir imagen'}<input type="file" id="dojologo" accept="image/*" hidden></label>${S.dojo.logo ? ' <button class="btn sm ghost" id="dojoquitar">Quitar</button>' : ''}</td></tr>
     </table>` : ''}
     <div class="up" style="margin:16px 0 8px;color:var(--ink)">Copia de seguridad</div>
-    ${esIOS() ? '<p class="msg">iPhone y iPad: guardá una copia de seguridad. Si usás Arise desde Safari sin instalarla y pasan 7 días sin abrirla, iOS puede borrar tus datos.</p>' : ''}
+    ${esIOS() ? '<p class="msg">iPhone y iPad: guardá una copia de seguridad. Si usás Dankai desde Safari sin instalarla y pasan 7 días sin abrirla, iOS puede borrar tus datos.</p>' : ''}
     <div class="btns" style="margin-top:4px">
       <button class="btn sm" id="exp">Exportar copia</button>
       <label class="btn sm">Importar<input type="file" id="imp" accept="application/json" hidden></label>
       <button class="btn sm ghost" id="rst">Borrar todo</button>
     </div>
     <p class="mut" style="font-size:.78rem;margin:12px 0 0">Tus datos viven solo en este dispositivo. Exportá una copia de vez en cuando.</p>
-    <p class="mut num" style="font-size:.78rem;margin:8px 0 0">Arise v${APP_VERSION} · <a href="#/novedades" style="text-decoration:underline">Novedades</a></p>
+    <div class="up" style="margin:16px 0 4px;color:var(--ink)">Acerca de</div>
+    <p style="margin:0;font-size:.95rem">Dankai · <span class="kanji" lang="ja">段階</span> — etapa, peldaño.</p>
+    <p class="mut num" style="font-size:.78rem;margin:6px 0 0">Versión ${APP_VERSION} · <a href="#/novedades" style="text-decoration:underline">Novedades</a></p>
   </section>`;
 
   tarjetaBind(root);
@@ -111,10 +113,11 @@ export function render(root, ctx) {
   on('#exp', 'click', () => {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([exportJSON()], { type: 'application/json' }));
-    a.download = `arise-${ymd()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    a.download = `dankai-backup-${ymd()}.json`;   // el nombre de archivo no se valida al importar: también se aceptan los arise-*.json viejos
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });
   on('#imp', 'change', async (e) => {
     try { importJSON(await e.target.files[0].text()); ctx.toast('Copia importada'); ctx.refresh(); } catch { ctx.toast('Archivo no válido'); }
   });
-  on('#rst', 'click', () => { if (confirm('¿Borrar todos tus datos de Arise?')) { reset(); ctx.refresh(); } });
+  on('#rst', 'click', () => { if (confirm('¿Borrar todos tus datos de Dankai?')) { reset(); ctx.refresh(); } });
 }
