@@ -167,3 +167,6 @@ body.setup #nav, body.setup #tbar { display: none; }
 @media (max-width: 420px) { .mvs { gap: 4px; } .mv { width: 36px; } }
 
 .mdl .btn { min-height: 44px; padding: 8px 16px; }
+
+#toast.act { pointer-events: auto; }
+.toastbtn { margin-left: 12px; padding: 2px 4px; font-weight: 700; color: var(--acc); text-decoration: underline; }

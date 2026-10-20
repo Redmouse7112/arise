@@ -65,6 +65,7 @@ export function render(root, ctx, id) {
       <div class="ring"><svg viewBox="0 0 220 220"><circle class="bg" cx="110" cy="110" r="100"/><circle class="fg" id="rf" cx="110" cy="110" r="100" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg>
         <div class="tm"><b id="rt">--:--</b><span class="up" id="rs">${esc(ex.n)}</span></div></div>
       <div class="stepper" id="dur"><button class="btn sm" data-dur="-${STEP}">−${STEP === 60 ? '1 min' : STEP + ' s'}</button><b class="num" id="durv">${durTxt(P.dur)}</b><button class="btn sm" data-dur="${STEP}">+${STEP === 60 ? '1 min' : STEP + ' s'}</button></div>
+      <div class="btns" id="presets" style="margin-bottom:10px">${[30, 45, 60, 120, 300, 600, 900, 1200].map((x) => `<button class="btn sm ${x === P.dur ? 'pri' : ''}" data-pre="${x}">${durTxt(x)}</button>`).join('')}</div>
       <div class="btns" id="tb"></div>
     </section>`;
   } else {
@@ -93,14 +94,21 @@ export function render(root, ctx, id) {
       tr.querySelector('[data-chk]').addEventListener('click', () => {
         T.unlockAudio();
         const r = ensure(), v = read(tr), was = !!(r.sets[i] && r.sets[i].d);
+        let completada = false;
         r.sets[i] = { w: v.w, r: v.r, d: !was };
         if (!was) {
           S.last[id] = { w: v.w === '' ? undefined : parseFloat(v.w), r: v.r === '' ? undefined : parseFloat(v.r) };
           const n = r.n || ex.sets, left = [...Array(n).keys()].filter((k) => !(r.sets[k] && r.sets[k].d)).length;
-          if (left > 0) T.startDown(P.rest * 1000, { kind: 'rest', label: `Descanso · ${ex.n}` });
-          else if (T.view() && T.view().meta && T.view().meta.kind === 'rest') T.stop();
+          if (left > 0) { if (S.ajustes.descansoAuto !== false) T.startDown(P.rest * 1000, { kind: 'rest', label: `Descanso · ${ex.n}` }); }   // el descanso arranca solo (si no está apagado en Ajustes), no después de la última serie
+          else {
+            if (T.view() && T.view().meta && T.view().meta.kind === 'rest') T.stop();
+            completada = true;
+          }
         }
-        save(); ctx.commit(); ctx.refresh();
+        save();
+        // Al marcar la última serie el ejercicio se tilda solo; el aviso permite deshacerlo unos segundos (vuelve a quedar la serie sin marcar).
+        ctx.commit(completada ? { t: 'Deshacer', fn: () => { const rr = ensure(); if (rr.sets[i]) rr.sets[i].d = false; save(); ctx.commit(); ctx.refresh(); } } : undefined);
+        ctx.refresh();
       });
     });
     const so = q('#sugOk');
@@ -125,15 +133,17 @@ export function render(root, ctx, id) {
       q('#rf').style.strokeDashoffset = a ? C * (1 - v.left / v.total) : 0;
       q('#rs').textContent = a ? (v.paused ? 'En pausa' : v.done ? '¡Listo!' : ex.n) : done ? 'Hecho' : ex.n;
       q('#dur').style.display = a ? 'none' : 'flex';
+      q('#presets').style.display = a ? 'none' : 'flex';
       const tb = q('#tb'), sig = a ? `${v.paused}|${v.done}` : 'idle|' + done;
-      if (tb.dataset.sig !== sig) {
+      if (tb.dataset.sig !== sig || !tb.childElementCount) {   // el redibujado por diferencias puede vaciar #tb sin tocar el dato
         tb.dataset.sig = sig;
         tb.innerHTML = a && !v.done
-          ? `<button class="btn pri" id="pp">${v.paused ? 'Reanudar' : 'Pausa'}</button><button class="btn" id="p30">+30 s</button><button class="btn ghost" id="stp">Detener</button>`
+          ? `<button class="btn pri" id="pp">${v.paused ? 'Reanudar' : 'Pausa'}</button><button class="btn" id="rst">Reiniciar</button><button class="btn" id="p30">+30 s</button><button class="btn ghost" id="stp">Detener</button>`
           : `<button class="btn pri" id="go">${done ? 'Repetir' : 'Iniciar'}</button>${done ? '' : '<button class="btn" id="man">Marcar hecho</button>'}`;
         const b = (s, f) => { const e = tb.querySelector(s); if (e) e.addEventListener('click', f); };
         b('#pp', () => (T.view().paused ? T.resume() : T.pause()));
         b('#p30', () => T.add(30000));
+        b('#rst', () => T.startDown(P.dur * 1000, { kind: 'ex', exId: id, date, label: ex.n }));   // reiniciar la cuenta con la duración elegida
         b('#stp', () => T.stop());
         b('#go', () => T.startDown(P.dur * 1000, { kind: 'ex', exId: id, date, label: ex.n }));
         b('#man', () => { markDone(date, id, P.dur); ctx.commit(); ctx.refresh(); });
@@ -141,6 +151,9 @@ export function render(root, ctx, id) {
     };
     paint(T.view());
     off = T.sub((type, v) => { if (root.isConnected && q('#rt')) paint(v); });
+    root.querySelectorAll('[data-pre]').forEach((b) => b.addEventListener('click', () => {
+      S.prefs[id] = { ...(S.prefs[id] || {}), dur: +b.dataset.pre }; save(); ctx.refresh();
+    }));
     root.querySelectorAll('[data-dur]').forEach((b) => b.addEventListener('click', () => {
       S.prefs[id] = { ...(S.prefs[id] || {}), dur: Math.max(STEP, P.dur + +b.dataset.dur) }; save(); ctx.refresh();
     }));

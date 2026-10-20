@@ -58,9 +58,18 @@ function buildNav() {
   nav.innerHTML = items.map(([k, n]) => `<a href="#/${k}" data-k="${k}">${ICON[k]}<span>${n}</span></a>`).join('');
 }
 
-export function toast(msg) {
-  toastEl.textContent = msg; toastEl.classList.add('on');
-  clearTimeout(tTimer); tTimer = setTimeout(() => toastEl.classList.remove('on'), 2200);
+// Aviso breve. Con `accion` ({ t, fn, ms }) suma un botón (por ejemplo "Deshacer") y dura unos 5 s.
+export function toast(msg, accion) {
+  toastEl.textContent = msg;
+  toastEl.classList.toggle('act', !!accion);
+  if (accion) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'toastbtn'; b.textContent = accion.t;
+    b.onclick = () => { clearTimeout(tTimer); toastEl.classList.remove('on'); accion.fn(); };
+    toastEl.appendChild(b);
+  }
+  toastEl.classList.add('on');
+  clearTimeout(tTimer); tTimer = setTimeout(() => toastEl.classList.remove('on'), accion ? (accion.ms || 5000) : 2200);
 }
 
 function theme() {
@@ -72,11 +81,13 @@ const ctx = {
   toast,
   refresh: () => route({ refresh: true }),   // vuelve a dibujar la pantalla actual tocando solo los nodos que cambiaron
   // Calcula la diferencia de XP y avisa (incluye subida de nivel).
-  commit() {
+  // `accion` (opcional) agrega un botón al aviso, por ejemplo Deshacer tras un tilde automático.
+  commit(accion) {
     const xp = totalXP(), d = xp - lastXP, a = levelInfo(lastXP).lvl, b = levelInfo(xp).lvl;
-    if (b > a) toast(`¡Nivel ${b}!  ${levelInfo(xp).title}`);
-    else if (d > 0) toast(`+${d} XP`);
+    if (b > a) toast(`¡Nivel ${b}!  ${levelInfo(xp).title}`, accion);
+    else if (d > 0) toast(accion ? `Hecho · +${d} XP` : `+${d} XP`, accion);
     else if (d < 0) toast(`${d} XP`);
+    else if (accion) toast('Hecho', accion);
     lastXP = xp;
   },
 };
@@ -118,18 +129,22 @@ function renderBar(v) {
   if (!v || here) { tbar.innerHTML = ''; tbar.className = ''; barSig = ''; return; }
   const txt = v.mode === 'up' ? T.fmtUp(v.elapsed) : T.fmt(v.left);
   const label = v.mode === 'phases' ? `${v.phase.round ? `Ronda ${v.phase.round}/${v.phase.rounds} · ` : ''}${v.phase.label}` : v.meta.label || '';
+  const descanso = v.meta.kind === 'rest';   // descanso entre series: −15 s, +15 s y Saltar
   const sig = `${v.mode}|${v.paused}|${v.done}|${v.idx}`;
   tbar.className = v.done ? 'done' : '';
   if (sig !== barSig) {
     barSig = sig;
     tbar.innerHTML = `<div><span class="tt num" id="tbt"></span><span class="tl">${v.done ? '¡Tiempo cumplido!' : esc(label)}</span>
-      ${v.done ? '' : `<button class="btn sm" id="tp">${v.paused ? 'Seguir' : 'Pausa'}</button>`}
-      ${v.mode !== 'up' && !v.done ? '<button class="btn sm" id="t30">+30</button>' : ''}
+      ${descanso && !v.done ? '<button class="btn sm" id="tm15">−15 s</button><button class="btn sm" id="tp15">+15 s</button>' : ''}
+      ${v.done || descanso ? '' : `<button class="btn sm" id="tp">${v.paused ? 'Seguir' : 'Pausa'}</button>`}
+      ${v.mode !== 'up' && !v.done && !descanso ? '<button class="btn sm" id="t30">+30</button>' : ''}
       ${v.meta.exId && v.meta.kind !== 'ex' ? `<a class="btn sm" href="#/ej/${v.meta.exId}">Abrir</a>` : ''}
-      <button class="btn sm ghost" id="tx">${v.done ? 'Cerrar' : 'Parar'}</button></div>`;
+      <button class="btn sm ghost" id="tx">${v.done ? 'Cerrar' : descanso ? 'Saltar' : 'Parar'}</button></div>`;
     const on = (s, f) => { const e = tbar.querySelector(s); if (e) e.addEventListener('click', f); };
     on('#tp', () => (T.view().paused ? T.resume() : T.pause()));
     on('#t30', () => T.add(30000));
+    on('#tm15', () => T.add(-15000));
+    on('#tp15', () => T.add(15000));
     on('#tx', () => T.stop());
   }
   const el = tbar.querySelector('#tbt'); if (el) el.textContent = txt;
@@ -137,8 +152,13 @@ function renderBar(v) {
 T.sub((type, v) => {
   if (type === 'done' && v.meta) {
     if (v.meta.kind === 'ex') {
-      markDone(v.meta.date, v.meta.exId, Math.round(v.total / 1000));
-      ctx.commit(); toast('¡Hecho!');
+      // Tilde automático al terminar el temporizador (también si terminó con la app cerrada). Se puede deshacer unos segundos.
+      const { date, exId } = v.meta, ya = !!(get().log[date] && get().log[date].ex[exId] && get().log[date].ex[exId].done);
+      markDone(date, exId, Math.round(v.total / 1000));
+      ctx.commit(ya ? undefined : { t: 'Deshacer', fn: () => {
+        const r = get().log[date] && get().log[date].ex[exId]; if (r) { r.done = false; delete r.t; }
+        save(); T.stop(); ctx.commit(); route({ refresh: true });
+      } });
       if (location.hash.startsWith('#/ej/') || location.hash === '#/hoy') route({ refresh: true });
     } else if (v.meta.kind === 'run' || v.meta.kind === 'spar') {
       toast('¡Terminaste! Guardá tu registro');
@@ -146,7 +166,7 @@ T.sub((type, v) => {
       addMinutes(v.meta.date, v.meta.min || Math.round(v.total / 60000));
       toast(`Lectura terminada · ${v.meta.min || Math.round(v.total / 60000)} min`);
       if (location.hash === '#/lectura') route({ refresh: true });
-    } else toast('Descanso terminado');
+    } else if (!v.late) toast('Descanso terminado');
   }
   renderBar(v);
 });
