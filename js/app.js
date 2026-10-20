@@ -1,5 +1,6 @@
 // Arranque, router por hash, barra de temporizador, toasts.
-import { load, get, ymd, save } from './store.js';
+import { load, get, ymd, save, modActivo, hayMision, getBloqueo } from './store.js';
+import * as M from './morph.js';
 import { initNovedades, hasData } from './aviso.js';
 import { esc } from './ui.js';
 import * as Inst from './instalar.js';
@@ -17,6 +18,7 @@ const VIEWS = {
   mas: () => import('./views/mas.js'),
   rutinas: () => import('./views/rutinas.js'),
   inicio: () => import('./views/inicio.js'),
+  bloqueo: () => import('./views/bloqueo.js'),
   plan: () => import('./views/plan.js'),
   sparring: () => import('./views/diario.js'),
   trote: () => import('./views/historial.js'),
@@ -25,6 +27,8 @@ const VIEWS = {
 };
 // Ejercicios con pantalla propia (el resto usa views/ejercicio.js).
 const SPECIAL = { trote: () => import('./views/trote.js'), clase: () => import('./views/clase.js'), spar: () => import('./views/spar.js') };
+// Módulo que necesita cada pantalla ('mision' = alguno de gym, cal, trote o artes): si está apagado, se vuelve a Estado.
+const NECESITA = { hoy: 'mision', ej: 'mision', plan: 'mision', rutinas: 'mision', comida: 'comida', lectura: 'lectura', sparring: 'artes', trote: 'trote' };
 const NAVKEY = { ej: 'hoy', plan: 'mas', rutinas: 'mas', sparring: 'mas', trote: 'mas', novedades: 'mas' };
 const ICON = {
   mas: '<svg viewBox="0 0 24 24"><circle cx="5.500" cy="12" r="1.600"/><circle cx="12" cy="12" r="1.600"/><circle cx="18.500" cy="12" r="1.600"/></svg>',
@@ -43,8 +47,16 @@ const tbar = document.getElementById('tbar');
 const toastEl = document.getElementById('toast');
 let cleanup = null, lastXP = totalXP(), tTimer;
 
-nav.innerHTML = [['estado', 'Estado'], ['hoy', 'Misión'], ['comida', 'Comida'], ['lectura', 'Lectura'], ['mas', 'Más']]
-  .map(([k, n]) => `<a href="#/${k}" data-k="${k}">${ICON[k]}<span>${n}</span></a>`).join('');
+M.instalar(root);
+// Barra inferior: Estado, Misión, Comida, Lectura y Más; se omiten los módulos apagados (Misión solo si no queda gym, cal, trote ni artes).
+let navSig = '';
+function buildNav() {
+  const items = [['estado', 'Estado'], ...(hayMision() ? [['hoy', 'Misión']] : []), ...(modActivo('comida') ? [['comida', 'Comida']] : []),
+    ...(modActivo('lectura') ? [['lectura', 'Lectura']] : []), ['mas', 'Más']];
+  const sig = items.map((i) => i[0]).join();
+  if (sig === navSig) return; navSig = sig;
+  nav.innerHTML = items.map(([k, n]) => `<a href="#/${k}" data-k="${k}">${ICON[k]}<span>${n}</span></a>`).join('');
+}
 
 export function toast(msg) {
   toastEl.textContent = msg; toastEl.classList.add('on');
@@ -58,7 +70,7 @@ function theme() {
 
 const ctx = {
   toast,
-  refresh: (keep) => route(keep),   // keep=true conserva el scroll
+  refresh: () => route({ refresh: true }),   // vuelve a dibujar la pantalla actual tocando solo los nodos que cambiaron
   // Calcula la diferencia de XP y avisa (incluye subida de nivel).
   commit() {
     const xp = totalXP(), d = xp - lastXP, a = levelInfo(lastXP).lvl, b = levelInfo(xp).lvl;
@@ -69,20 +81,32 @@ const ctx = {
   },
 };
 
-async function route(keep) {
+let lastKey = '';
+async function route(opts = {}) {
   if (cleanup) { try { cleanup(); } catch {} cleanup = null; }
   theme();
+  const bl = getBloqueo();
+  const pend = !bl && get().setup === 'pendiente';   // instalación nueva: primero elegir módulos y rutina
+  document.body.classList.toggle('setup', pend || !!bl);
+  buildNav();
   const [, k = 'estado', arg] = location.hash.replace('#', '').split('/');
-  const pend = get().setup === 'pendiente';   // instalación nueva: primero elegir rutina de ejemplo o vacío
-  document.body.classList.toggle('setup', pend);
-  const name = pend ? 'inicio' : VIEWS[k] ? k : 'estado';
+  if (!bl && !pend && NECESITA[k]) {
+    const n = NECESITA[k];
+    if (!(n === 'mision' ? hayMision() : modActivo(n))) { location.hash = '#/estado'; return; }
+  }
+  const name = bl ? 'bloqueo' : pend ? 'inicio' : VIEWS[k] ? k : 'estado';
   nav.querySelectorAll('a').forEach((a) => a.classList.toggle('on', a.dataset.k === (NAVKEY[name] || name)));
+  const key = `${name}/${arg || ''}`, refresh = opts.refresh === true && key === lastKey;
+  if (!refresh) M.pantallaNueva();
   const mod = await (name === 'ej' && SPECIAL[arg] ? SPECIAL[arg]() : VIEWS[name]());
   const c = mod.render(root, ctx, arg);
   cleanup = typeof c === 'function' ? c : null;
-  root.style.animation = 'none'; void root.offsetWidth; root.style.animation = '';
-  if (k === 'estado' && arg === 'ajustes') { const a = document.getElementById('ajustes'); if (a) a.scrollIntoView(); }
-  else if (!keep) window.scrollTo(0, 0);
+  lastKey = key;
+  if (!refresh) {
+    root.style.animation = 'none'; void root.offsetWidth; root.style.animation = '';
+    if (k === 'estado' && arg === 'ajustes') { const a = document.getElementById('ajustes'); if (a) a.scrollIntoView(); }
+    else window.scrollTo(0, 0);
+  }
   renderBar(T.view());
 }
 window.addEventListener('hashchange', () => route());
@@ -115,13 +139,13 @@ T.sub((type, v) => {
     if (v.meta.kind === 'ex') {
       markDone(v.meta.date, v.meta.exId, Math.round(v.total / 1000));
       ctx.commit(); toast('¡Hecho!');
-      if (location.hash.startsWith('#/ej/') || location.hash === '#/hoy') route();
+      if (location.hash.startsWith('#/ej/') || location.hash === '#/hoy') route({ refresh: true });
     } else if (v.meta.kind === 'run' || v.meta.kind === 'spar') {
       toast('¡Terminaste! Guardá tu registro');
     } else if (v.meta.kind === 'read') {
       addMinutes(v.meta.date, v.meta.min || Math.round(v.total / 60000));
       toast(`Lectura terminada · ${v.meta.min || Math.round(v.total / 60000)} min`);
-      if (location.hash === '#/lectura') route(true);
+      if (location.hash === '#/lectura') route({ refresh: true });
     } else toast('Descanso terminado');
   }
   renderBar(v);
@@ -132,7 +156,7 @@ Inst.init(toast);
 // Pedir almacenamiento persistente (si el navegador lo soporta); sin avisos si falla.
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch {}
 // Si cambia el estado de instalación, redibujo Estado o Más (sin tocar un campo que se esté escribiendo).
-Inst.onChange(() => { if (/^#\/(estado|mas)?$|^#\/(estado|mas)\//.test(location.hash || '#/estado') && !document.querySelector('#view :focus')) route(true); });
+Inst.onChange(() => { if (/^#\/(estado|mas)?$|^#\/(estado|mas)\//.test(location.hash || '#/estado') && !document.querySelector('#view :focus')) route({ refresh: true }); });
 route().then(() => {
   initNovedades(hadData);
   setTimeout(() => document.getElementById('splash').classList.add('off'), 700);
