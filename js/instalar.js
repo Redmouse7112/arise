@@ -1,6 +1,7 @@
 // Instalación de la app: botón propio con beforeinstallprompt y ayuda por navegador cuando no está disponible.
 import { abrirModal } from './modal.js';
 
+// LEGADO: prefijo "arise." del nombre anterior; se mantiene por compatibilidad con los datos existentes.
 const FLAG = 'arise.instalada', DISMISS = 'arise.instalar';
 const ls = {
   get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
@@ -21,7 +22,7 @@ export const dismissCard = () => { ls.set(DISMISS, '1'); notify(); };
 export function init(toastFn) {
   toast = toastFn;
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; ls.del(FLAG); notify(); });
-  window.addEventListener('appinstalled', () => { deferred = null; ls.set(FLAG, '1'); toast('Arise instalada'); notify(); });
+  window.addEventListener('appinstalled', () => { deferred = null; ls.set(FLAG, '1'); toast('Dankai instalada'); notify(); });
 }
 
 // iPhone/iPad; iPadOS se presenta como Mac, se distingue por la pantalla táctil.
@@ -48,7 +49,7 @@ const AYUDA = {
   'firefox-android': 'Tocá el menú <b>⋮</b> del navegador y elegí <b>Instalar</b>.',
   escritorio: 'Buscá el <b>ícono de instalar</b> a la derecha de la barra de direcciones y tocalo.',
   'safari-mac': 'En Safari 17 o más nuevo, abrí el menú <b>Archivo</b> y elegí <b>Agregar al Dock</b>.',
-  firefox: 'Firefox de escritorio no permite instalar apps web. Podés usar Arise desde el navegador, o abrirla en Chrome o Edge para instalarla.',
+  firefox: 'Firefox de escritorio no permite instalar apps web. Podés usar Dankai desde el navegador, o abrirla en Chrome o Edge para instalarla.',
   otro: 'Buscá en el menú de tu navegador una opción como <b>Instalar app</b> o <b>Agregar a pantalla de inicio</b>. Si no la tiene, tu navegador no permite instalarla.',
 };
 export const ayudaPara = (n) => AYUDA[n] || AYUDA.otro;
@@ -58,14 +59,14 @@ const copiar = async () => {
 };
 function pasosIOS() {
   return safariIOS()
-    ? `<ol class="pasos"><li>Abrí Arise en <b>Safari</b>.</li><li>Tocá el botón <b>Compartir</b>.</li><li>Elegí <b>Agregar a inicio</b> (en algunos iPhone se llama «Agregar a pantalla de inicio» o «Add to Home Screen»).</li></ol>`
+    ? `<ol class="pasos"><li>Abrí Dankai en <b>Safari</b>.</li><li>Tocá el botón <b>Compartir</b>.</li><li>Elegí <b>Agregar a inicio</b> (en algunos iPhone se llama «Agregar a pantalla de inicio» o «Add to Home Screen»).</li></ol>`
     : `<p style="margin:0 0 8px">Para instalarla en iPhone tenés que abrir este enlace en <b>Safari</b>. Copialo y pegalo allá; después tocá <b>Compartir</b> y <b>Agregar a inicio</b>.</p>`;
 }
 
 export async function instalar() {
   if (!deferred) {
     const ios = esIOS();
-    abrirModal({ id: 'instalarAyuda', label: 'Cómo instalar Arise', titulo: 'Instalar Arise',
+    abrirModal({ id: 'instalarAyuda', label: 'Cómo instalar Dankai', titulo: 'Instalar Dankai',
       html: ios ? `${pasosIOS()}<p class="mut" style="margin:8px 0 0">${AVISO_7D}</p>` : `<p style="margin:0">${ayudaPara(navegador())}</p>`, boton: 'Entendido' });
     return;
   }
@@ -73,7 +74,7 @@ export async function instalar() {
   try {
     e.prompt();
     const { outcome } = await e.userChoice;
-    if (outcome === 'accepted') { ls.set(FLAG, '1'); toast('Arise instalada'); }
+    if (outcome === 'accepted') { ls.set(FLAG, '1'); toast('Dankai instalada'); }
   } catch {}
   notify();
 }
@@ -87,8 +88,8 @@ export function tarjetaHTML() {
       <div class="btns" style="justify-content:flex-start">${safariIOS() ? '' : '<button class="btn sm pri" id="instCopy">Copiar enlace</button>'}<button class="btn sm ghost" id="instNo">Ahora no</button></div></section>`;
   }
   return `<section class="panel" id="instCard"><div class="up" style="margin-bottom:6px">Instalar</div>
-    <p style="margin:0 0 12px;font-size:.92rem">Instalá Arise en tu dispositivo: abre más rápido y funciona sin internet.</p>
-    <div class="btns" style="justify-content:flex-start"><button class="btn sm pri" id="instBtn">Instalar Arise</button><button class="btn sm ghost" id="instNo">Ahora no</button></div></section>`;
+    <p style="margin:0 0 12px;font-size:.92rem">Instalá Dankai en tu dispositivo: abre más rápido y funciona sin internet.</p>
+    <div class="btns" style="justify-content:flex-start"><button class="btn sm pri" id="instBtn">Instalar Dankai</button><button class="btn sm ghost" id="instNo">Ahora no</button></div></section>`;
 }
 export function tarjetaBind(root) {
   const b = root.querySelector('#instBtn'); if (b) b.onclick = instalar;

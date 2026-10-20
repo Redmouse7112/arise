@@ -6,7 +6,7 @@ export function render(root, ctx) {
   const S = get();
   let paso = 1;
   const draw = () => {
-    root.innerHTML = `<div style="text-align:center;margin:18px 0 22px"><img src="${IMG.logo}" alt="Arise" style="width:96px;border-radius:18px"><h1 style="margin:14px 0 6px;font-size:1.3rem">Bienvenido a Arise</h1>
+    root.innerHTML = `<div style="text-align:center;margin:18px 0 22px"><img src="${IMG.logo}" alt="Dankai" style="width:96px;border-radius:18px"><h1 style="margin:14px 0 6px;font-size:1.3rem">Bienvenido a Dankai</h1>
       <p class="mut" style="margin:0">${paso === 1 ? 'Elegí qué querés usar. Podés cambiarlo cuando quieras en Ajustes.' : '¿Cómo querés empezar? Todo se puede cambiar después.'}</p></div>
     ${paso === 1 ? `<section class="panel">${MODULOS.map((m) => `<label class="row li"><div style="flex:1;min-width:0"><div class="t">${m.n}</div><div class="mut" style="font-size:.8rem">${m.d}</div></div>
         <input type="checkbox" data-mod="${m.k}" aria-label="${m.n}" ${S.mods[m.k] !== false ? 'checked' : ''}></label>`).join('')}

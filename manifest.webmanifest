@@ -1,9 +1,9 @@
 {
   "id": "./",
-  "name": "Arise",
+  "name": "Dankai",
   "lang": "es",
-  "short_name": "Arise",
-  "description": "Tu sistema de entrenamiento personal",
+  "short_name": "Dankai",
+  "description": "Dankai: tu sistema de entrenamiento personal",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
