@@ -4,6 +4,7 @@ import { APP_VERSION } from './data.js';
 import { NOVEDADES } from './novedades.js';
 import { abrirModal } from './modal.js';
 
+// LEGADO: prefijo "arise." del nombre anterior; se mantiene por compatibilidad con los datos existentes.
 const SEEN = 'arise.seen';
 const read = () => { try { return localStorage.getItem(SEEN); } catch { return null; } };
 const write = (v) => { try { localStorage.setItem(SEEN, v); } catch {} };
@@ -16,7 +17,7 @@ export function cmpVer(a, b) {
   return 0;
 }
 
-// ¿Había datos de Arise antes de este arranque? Llamar antes de load().
+// ¿Había datos de Dankai antes de este arranque? Llamar antes de load().
 // Hay datos si el estado guardado tiene algún registro o si existe alguna copia arise.v1.bak*.
 export function hasData() {
   try {

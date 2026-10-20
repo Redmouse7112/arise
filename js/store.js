@@ -2,6 +2,8 @@
 import { DEFAULT_PLAN, SEED_LAST, TRABAJO } from './data.js';
 import * as R from './rutinas.js';
 
+// LEGADO: el prefijo "arise." (arise.v1, arise.v1.bak*, arise.v1.preimport, arise.v1.corrupto, arise.seen, arise.timer, arise.instalada,
+// arise.instalar) es del nombre anterior de la app y se mantiene a propósito: renombrarlo dejaría sin datos a las instalaciones existentes.
 const KEY = 'arise.v1';
 let S, bloqueo = null;
 

@@ -2,6 +2,7 @@
 // Todo se calcula contra horas absolutas (Date.now), nunca sumando segundos: sigue exacto aunque la app pase a segundo plano,
 // la pestaña se descarte o se recargue. El estado en curso se guarda en localStorage ('arise.timer'): al volver se ve lo que
 // queda o que ya terminó, y un temporizador que venció mientras la app estaba cerrada avisa su fin una vez (con `late: true`, sin sonido).
+// LEGADO: prefijo "arise." del nombre anterior; se mantiene por compatibilidad con los datos existentes.
 const K = 'arise.timer';
 let t = null, iv = null, ctx = null, lock = null;
 const subs = new Set();
