@@ -1,6 +1,6 @@
 // Misión del día: sesión de hoy con lista de ejercicios.
 import { IMG } from '../data.js';
-import { get, ymd, sessionFor, sesionDia, setSession } from '../store.js';
+import { get, ymd, sessionFor, sesionDia, setSession, modActivo, modOf } from '../store.js';
 import { dayStats } from '../xp.js';
 import { lastWork } from '../entreno.js';
 import { esc } from '../ui.js';
@@ -8,13 +8,14 @@ import { muscleImg, target, exDone, CHECK, habitCards } from '../ui.js';
 
 export function render(root, ctx) {
   const S = get(), date = ymd(), sid = sessionFor(date), sess = sesionDia(date), st = dayStats(date);
-  const opts = S.routines.map((r) => `<option value="${esc(r.id)}" ${r.id === sid ? 'selected' : ''}>${esc(r.n)}</option>`).join('');
+  const visibles = S.routines.filter((r) => modActivo(modOf(r)) || r.id === sid);   // las de un módulo apagado no se ofrecen
+  const opts = visibles.map((r) => `<option value="${esc(r.id)}" ${r.id === sid ? 'selected' : ''}>${esc(r.n)}</option>`).join('');
   if (!sess) {   // sin rutina para hoy (plan vacío o rutina eliminada)
     root.innerHTML = `<div class="head"><h1>Misión del día</h1></div>
     <section class="panel"><div class="up">Hoy no tenés rutina</div>
-      <p style="margin:8px 0 12px">${S.routines.length ? 'Elegí una para hoy, o asignale una rutina a cada día en el Plan.' : 'Todavía no creaste ninguna rutina.'}</p>
-      ${S.routines.length ? `<select class="pick" id="pick"><option value="">Elegir rutina…</option>${opts}</select>` : ''}
-      <div class="btns" style="margin-top:12px"><a class="btn pri" href="#/rutinas">${S.routines.length ? 'Mis rutinas' : 'Crear mi primera rutina'}</a><a class="btn" href="#/plan">Plan semanal</a></div></section>
+      <p style="margin:8px 0 12px">${visibles.length ? 'Elegí una para hoy, o asignale una rutina a cada día en el Plan.' : 'Todavía no creaste ninguna rutina.'}</p>
+      ${visibles.length ? `<select class="pick" id="pick"><option value="">Elegir rutina…</option>${opts}</select>` : ''}
+      <div class="btns" style="margin-top:12px"><a class="btn pri" href="#/rutinas">${visibles.length ? 'Mis rutinas' : 'Crear mi primera rutina'}</a><a class="btn" href="#/plan">Plan semanal</a></div></section>
     <div style="margin-top:14px">${habitCards()}</div>`;
     const pk = root.querySelector('#pick'); if (pk) pk.addEventListener('change', (e) => { if (e.target.value) { setSession(date, e.target.value); ctx.refresh(); } });
     return;

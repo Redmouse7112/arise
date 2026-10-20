@@ -1,6 +1,6 @@
 // Utilidades de interfaz compartidas por las vistas.
 import { MUS, IMG } from './data.js';
-import { get, pref, sesionDia, exFor } from './store.js';
+import { get, pref, sesionDia, exFor, modActivo, nombreDojo } from './store.js';
 import { isDone } from './xp.js';
 import { foodDay, readDay } from './habitos.js';
 import { ymd } from './store.js';
@@ -38,7 +38,8 @@ export function habitCards() {
   const card = (href, color, label, now, goal, unit, pct) => `<a class="panel sc mini" href="${href}" style="--sc:${color};--acc:${color};margin:0">
     <div class="up">${label}</div><div class="num"><b>${now}</b><span class="mut"> / ${goal} ${unit}</span></div>
     <div class="bar"><b style="width:${Math.min(100, pct)}%"></b></div></a>`;
-  return `<div class="grid2" style="margin-bottom:14px">${card('#/comida', '#34d399', 'Proteína de hoy', f.g, f.goal, 'g', f.pct)}${card('#/lectura', '#22d3ee', 'Lectura de hoy', r.pages, r.goal, 'págs', r.pct)}</div>`;
+  const cs = [modActivo('comida') ? card('#/comida', '#34d399', 'Proteína de hoy', f.g, f.goal, 'g', f.pct) : '', modActivo('lectura') ? card('#/lectura', '#22d3ee', 'Lectura de hoy', r.pages, r.goal, 'págs', r.pct) : ''].filter(Boolean);
+  return cs.length ? `<div class="grid2" style="margin-bottom:14px${cs.length === 1 ? ';grid-template-columns:1fr' : ''}">${cs.join('')}</div>` : '';
 }
 
 // ---- piezas compartidas por las vistas de ejercicio especiales (trote, clase, sparring) ----

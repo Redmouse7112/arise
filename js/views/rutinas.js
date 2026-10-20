@@ -1,6 +1,6 @@
 // Rutinas (#/rutinas) y su editor (#/rutinas/<id>): crear, duplicar, renombrar, ordenar y editar ejercicios.
-import { IMG, MUS, EX, DAYS } from '../data.js';
-import { get, save, ymd, biblioteca, defOf, routineOf } from '../store.js';
+import { IMG, MUS, EX, DAYS, MODULOS, TRABAJO } from '../data.js';
+import { get, save, ymd, biblioteca, defOf, routineOf, modActivo, modOf } from '../store.js';
 import * as R from '../rutinas.js';
 import { abrirModal } from '../modal.js';
 import { esc, muscleImg, target } from '../ui.js';
@@ -26,11 +26,12 @@ export function render(root, ctx, arg) {
       form: true, label: 'Datos de la rutina', titulo: r ? 'Nombre y color' : 'Nueva rutina',
       html: `<label class="fld">Nombre<input class="tx" id="rn" maxlength="40" value="${esc(r ? r.n : '')}" placeholder="Ej.: Piernas"></label>
         <div class="up" style="margin:12px 0 6px">Color</div><div class="swatches" id="rc">${COLORES.map((c) => `<button type="button" class="sw ${c === color ? 'on' : ''}" data-c="${c}" style="background:${c}" aria-label="Color ${c}"></button>`).join('')}</div>
+        <label class="fld" style="margin-top:12px">Módulo<select class="pick" id="rm">${[...TRABAJO.map((k) => [k, MODULOS.find((m) => m.k === k).n]), ['', 'Ninguno']].map(([k, t]) => `<option value="${k}" ${(r ? modOf(r) : (TRABAJO.find(modActivo) || 'gym')) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
         <label class="fld" style="margin-top:12px">Imagen<select class="pick" id="ri">${Object.entries(IMGS).map(([k, t]) => `<option value="${k}" ${r && r.img === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>`,
       botones: [{ t: 'Cancelar' }, { t: 'Guardar', cls: 'pri', fn: (close, d) => {
         const n = d.querySelector('#rn').value.trim(); if (!n) { ctx.toast('Poné un nombre'); return false; }
-        const img = d.querySelector('#ri').value;
-        if (r) { r.n = n; r.color = color; r.img = img; rr(); } else { const nr = R.nuevaRutina(S, n, color, img); save(); location.hash = '#/rutinas/' + nr.id; }
+        const img = d.querySelector('#ri').value, mod = d.querySelector('#rm').value;
+        if (r) { r.n = n; r.color = color; r.img = img; r.mod = mod; rr(); } else { const nr = R.nuevaRutina(S, n, color, img, mod); save(); location.hash = '#/rutinas/' + nr.id; }
       } }],
       onClose: null,
     });
@@ -119,8 +120,8 @@ export function render(root, ctx, arg) {
     const rs = S.routines, lib = biblioteca();
     root.innerHTML = `<div class="head"><h1>Rutinas</h1><button class="btn sm pri" id="nueva">Nueva rutina</button></div>
     <p class="msg" style="margin-top:0">${NOTA_HOY}</p>
-    ${rs.length ? rs.map((r) => `<section class="panel sc" style="--sc:${esc(r.color)}"><div class="sess" style="grid-template-columns:56px 1fr;gap:12px"><img src="${IMG[r.img] || IMG.gym}" alt="" style="width:56px;height:56px">
-      <div><div style="font-weight:700">${esc(r.n)}</div><div class="mut num" style="font-size:.8rem">${r.ex.length} ejercicios · bonus +${r.bonus} XP</div>
+    ${rs.length ? rs.map((r) => `<section class="panel sc" style="--sc:${esc(r.color)}${modActivo(modOf(r)) ? '' : ';opacity:.55'}"><div class="sess" style="grid-template-columns:56px 1fr;gap:12px"><img src="${IMG[r.img] || IMG.gym}" alt="" style="width:56px;height:56px">
+      <div><div style="font-weight:700">${esc(r.n)}</div><div class="mut num" style="font-size:.8rem">${r.ex.length} ejercicios · bonus +${r.bonus} XP${modActivo(modOf(r)) ? '' : ' · módulo apagado'}</div>
         ${R.diasEnPlan(S, r.id).length ? `<div class="mut" style="font-size:.78rem">Plan: ${dias(S, r.id)}</div>` : ''}</div></div>
       <div class="btns" style="margin-top:12px;justify-content:flex-start"><a class="btn sm pri" href="#/rutinas/${esc(r.id)}">Editar</a><button class="btn sm" data-ds="${esc(r.id)}">Nombre y color</button>
         <button class="btn sm" data-dup="${esc(r.id)}">Duplicar</button><button class="btn sm ghost" data-del="${esc(r.id)}">Eliminar</button></div></section>`).join('')

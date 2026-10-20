@@ -1,12 +1,13 @@
 // Plan semanal editable: qué rutina toca cada día.
 import { DAYS } from '../data.js';
-import { get, save } from '../store.js';
+import { get, save, modActivo, modOf } from '../store.js';
 import { esc } from '../ui.js';
 
 export function render(root, ctx) {
   const S = get(), today = new Date().getDay();
   const order = [1, 2, 3, 4, 5, 6, 0];
-  const opts = (sel) => `<option value="">— Sin rutina —</option>${S.routines.map((r) => `<option value="${esc(r.id)}" ${sel === r.id ? 'selected' : ''}>${esc(r.n)}</option>`).join('')}`;
+  // Las rutinas de un módulo apagado no se ofrecen; si un día ya tiene una, se muestra bloqueada para no perder la asignación.
+  const opts = (sel) => `<option value="">— Sin rutina —</option>${S.routines.map((r) => { const act = modActivo(modOf(r)); return act || sel === r.id ? `<option value="${esc(r.id)}" ${sel === r.id ? 'selected' : ''} ${act ? '' : 'disabled'}>${esc(r.n)}${act ? '' : ' (módulo apagado)'}</option>` : ''; }).join('')}`;
   root.innerHTML = `
   <div class="head"><h1>Plan semanal</h1><a class="btn sm" href="#/rutinas">Mis rutinas</a></div>
   <section class="panel">
