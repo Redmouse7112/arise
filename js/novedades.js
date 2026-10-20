@@ -1,6 +1,13 @@
 // Registro de cambios para quien usa la app. La entrada más nueva va primero.
 // Regla: en cada entrega, subir APP_VERSION (data.js) y sumar acá su entrada, en lenguaje simple.
 export const NOVEDADES = [
+  { v: '2.2.2', fecha: '2026-10-20', items: [
+    'El descanso entre series arranca solo, y lo ajustás con −15 s, +15 s o Saltar.',
+    'Ejercicios con tiempo: elegí la duración, pausá o reiniciá.',
+    'Al terminar un ejercicio se tilda solo, y podés deshacerlo unos segundos.',
+    'Rondas de sparring con Kickboxing, Boxeo o las tuyas, con cuenta previa y campana.',
+    'Si cerrás la app con un temporizador en marcha, al volver ves cuánto queda.',
+  ] },
   { v: '2.2.1', fecha: '2026-10-20', items: [
     'Elegí qué módulos usar: gym, calistenia, trote, comida, lectura y artes marciales.',
     'Si ocultás un módulo, tus datos quedan guardados.',
