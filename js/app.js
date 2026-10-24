@@ -1,5 +1,5 @@
 // Arranque, router por hash, barra de temporizador, toasts.
-import { load, get, ymd, save, modActivo, hayMision, getBloqueo } from './store.js';
+import { load, get, ymd, save, modActivo, hayMision, getBloqueo, sesionDia, routineOf, modOf } from './store.js';
 import * as M from './morph.js';
 import { initNovedades, hasData } from './aviso.js';
 import { esc } from './ui.js';
@@ -72,9 +72,26 @@ export function toast(msg, accion) {
   clearTimeout(tTimer); tTimer = setTimeout(() => toastEl.classList.remove('on'), accion ? (accion.ms || 5000) : 2200);
 }
 
+// El color del cinturón queda en --belt (solo Artes marciales y el selector de cinturón lo usan).
 function theme() {
   const b = BELTS.find((x) => x.id === get().profile.belt) || BELTS[1];
-  document.documentElement.style.setProperty('--acc', b.c);
+  document.documentElement.style.setProperty('--belt', b.c);
+}
+
+// --acc, el acento de interfaz, sigue al módulo de la pantalla; sin módulo es la marca (--brand).
+const ACC_MOD = { gym: 'var(--mod-gym)', cal: 'var(--mod-cal)', trote: 'var(--mod-trote)', comida: 'var(--mod-comida)', lectura: 'var(--mod-lectura)', artes: 'var(--belt)' };
+function acento(name, arg) {
+  if (name === 'comida' || name === 'lectura' || name === 'trote') return ACC_MOD[name];
+  if (name === 'sparring') return 'var(--mod-spar)';
+  if (name === 'ej' && arg === 'spar') return 'var(--mod-spar)';
+  if (name === 'ej' && arg === 'clase') return ACC_MOD.artes;
+  if (name === 'ej' && arg === 'trote') return ACC_MOD.trote;
+  if (name === 'hoy' || name === 'ej') {
+    const s = sesionDia(ymd()), r = s && routineOf(s.id), m = r ? modOf(r) : '';
+    if (m === 'artes' && s.ex.some((e) => e.id === 'spar')) return 'var(--mod-spar)';
+    return ACC_MOD[m] || 'var(--brand)';
+  }
+  return 'var(--brand)';
 }
 
 const ctx = {
@@ -107,6 +124,7 @@ async function route(opts = {}) {
   }
   const name = bl ? 'bloqueo' : pend ? 'inicio' : VIEWS[k] ? k : 'estado';
   nav.querySelectorAll('a').forEach((a) => a.classList.toggle('on', a.dataset.k === (NAVKEY[name] || name)));
+  document.documentElement.style.setProperty('--acc', acento(name, arg));
   const key = `${name}/${arg || ''}`, refresh = opts.refresh === true && key === lastKey;
   if (!refresh) M.pantallaNueva();
   const mod = await (name === 'ej' && SPECIAL[arg] ? SPECIAL[arg]() : VIEWS[name]());

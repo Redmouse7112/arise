@@ -39,7 +39,7 @@ export function render(root, ctx) {
         <div class="up">Nivel</div>
         <div class="lvl num">${L.lvl} <span style="font-size:1rem;color:var(--ink);letter-spacing:.1em">· ${L.title.toUpperCase()}</span></div>
         ${artes ? `<div style="margin:8px 0 6px" class="belt"><i></i>Cinturón ${belt.n}</div>` : '<div style="height:8px"></div>'}
-        <div class="bar"><b style="width:${L.pct}%"></b></div>
+        <div class="bar xp"><b style="width:${L.pct}%"></b></div>
         <div class="row mut num" style="font-size:.78rem;margin-top:5px"><span>${xp} XP</span><span class="sp"></span><span>Próx. nivel: ${L.next} XP</span></div>
       </div>
     </div>
