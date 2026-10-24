@@ -77,6 +77,15 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 - Misión y racha: cada rutina pertenece a un módulo (`modOf`). **Hoy y los días futuros**: si la rutina planificada es de un módulo apagado, ese día no tiene sesión (Misión muestra "Hoy no tenés rutina" con las rutinas activas para elegir). Si hoy ya tiene registro, esa sesión se sigue mostrando y su XP cuenta. **Días pasados**: intactos (están congelados). La racha no se pausa por apagar módulos: un día sin sesión completa la corta como siempre, salvo los descansos planificados (el descanso no tiene módulo, así que sigue valiendo). Comida y lectura siguen sumando su XP aunque estén ocultas.
 - Primera vez: `views/inicio.js` pide elegir módulos y después ejemplo / vacío / importar; el ejemplo se guarda completo y los módulos apagados solo lo ocultan.
 
+## Colores
+Todos los colores salen de variables en `:root` (`css/base.css`); en CSS y en las plantillas de JS se usa `var(--token)`, no el valor.
+- **Marca fija** (del logo, `img/dankai-logo.svg`): `--brand`, `--brand-deep`, `--gold`. No cambian con el módulo ni con el cinturón. La barra de XP del hero (`.bar.xp`) y el número de nivel (`.lvl`) usan estos.
+- **Módulos**: `--mod-gym`, `--mod-cal`, `--mod-trote`, `--mod-comida`, `--mod-lectura`, `--mod-spar`. Artes marciales usa `--belt` (color del cinturón, lo pone `theme()` en `js/app.js`).
+- **`--acc`** es el acento de interfaz de la pantalla actual y lo fija `acento()` en `route()` (`js/app.js`): Estado, Más, Plan, Rutinas y demás pantallas sin módulo usan `--brand`; Comida, Lectura, Trote y Sparring, su módulo; Misión y Ejercicio, el módulo de la sesión de hoy (clase = `--belt`, sparring = `--mod-spar`). **`--sc`** es el color de la tarjeta (sesión).
+- **Fondos y texto**: `--bg`, `--bg2`, `--ink`, `--mut`, `--line`, `--panel`, `--card`, `--field`, `--glass`, `--veil` y compañeros. Estado: `--ok`, `--warn`, `--info`. Tinta sobre acento: `--on-acc`, `--on-ok`.
+- Siguen literales a propósito: los colores guardados en los datos del usuario (`color` de las rutinas, `BELTS` y `SESS` en `js/data.js`, `COLORES` en `js/views/rutinas.js`), `#fff` y `#000` dentro de `color-mix` y la máscara de la rejilla, y el destello `rgba(255,255,255,.02)` del panel.
+- Al agregar un color nuevo: crear el token primero y verificar contraste de texto de al menos 4,5:1 sobre `--bg`.
+
 ## Dibujado sin parpadeo
 - `ctx.refresh()` vuelve a ejecutar la vista de la pantalla actual, pero `js/morph.js` aplica el HTML por diferencias sobre `#view`: los nodos que no cambian se conservan (foco, scroll, valores a medio escribir). La primera asignación de `innerHTML` tras navegar (`pantallaNueva`) reemplaza todo; las siguientes, incluidos los redibujos internos de una vista, se aplican por diferencias. Al reutilizar un nodo se sueltan sus listeners para que la vista enlace los nuevos: las vistas deben volver a enlazar todo después de cada `innerHTML`.
 
@@ -123,6 +132,7 @@ img/                  WebP optimizados (sec-* emblemas, mus-* músculos)
 | V2b | 2.1.0 |
 | Arreglo de novedades | 2.1.1 |
 | V2c | 2.2.0 |
+| Colores unificados (2.3.0a) | 2.3.0 |
 | V3 | 3.0.0 |
 
 El `v` del esquema de datos (`localStorage`) es **independiente** de `APP_VERSION`: solo sube cuando cambia la forma de los datos guardados y se migra en `load()`.
@@ -160,6 +170,10 @@ En cada entrega: subir `APP_VERSION` según esta regla y agregar su entrada arri
 
 **2.2.2 (hecha)**
 - Temporizadores completos: descanso automático con −15 s / +15 s / Saltar y ajuste global, ejercicios con tiempo con preajustes y Reiniciar, tilde automático con Deshacer, rondas de artes marciales con presets, cuenta previa y campana, y aviso de fin tras reabrir la app.
+
+**2.3.0a (hecha)**
+- Colores unificados: tokens de marca, de módulo y de fondo en `:root`; `--acc` por pantalla; la barra de XP y el nivel usan la marca. Sin cambios de datos ni de lógica.
+- Falta del 2.3.0 (ver `ESTILO-ACTUAL.md`, sección 8): radios y tarjetas sin arcos (b), fuentes locales (c), transición única de pantalla (d), Misión compacta (e), efectos (f). `APP_VERSION` compara números: para que cada paso muestre sus novedades, subir el parche (2.3.1, 2.3.2…) y no usar sufijos de letra.
 
 **V3**
 - Cuerpo: peso, medidas y fotos de progreso (IndexedDB) con gráficos simples.
