@@ -31,7 +31,7 @@ export function render(root, ctx) {
 
   const draw = () => {
     const day = foodDay(date), pct = Math.min(100, day.pct);
-    root.innerHTML = `<div style="--acc:#34d399;--sc:#34d399">
+    root.innerHTML = `<div style="--acc:var(--mod-comida);--sc:var(--mod-comida)">
     <div class="head"><h1>Comida</h1><span class="up">${new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' })}</span></div>
     <section class="panel sc">
       <div class="sess"><img src="${IMG.comida}" alt="">

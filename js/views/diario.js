@@ -26,7 +26,7 @@ export function render(root, ctx) {
     const list = sparList();
     const cur = editId === 'new' ? { date: ymd(), rounds: 3, feel: 3, good: '', bad: '', work: '' } : list.find((x) => x.id === editId);
     let feel = cur ? cur.feel : 3;
-    root.innerHTML = `<div style="--acc:#ef4444;--sc:#ef4444"><div class="head"><h1>Diario de sparring</h1>${editId ? '' : '<button class="btn sm pri" id="new">Nueva entrada</button>'}</div>
+    root.innerHTML = `<div style="--acc:var(--mod-spar);--sc:var(--mod-spar)"><div class="head"><h1>Diario de sparring</h1>${editId ? '' : '<button class="btn sm pri" id="new">Nueva entrada</button>'}</div>
     ${cur ? `<section class="panel sc"><div class="up" style="margin-bottom:10px">${editId === 'new' ? 'Nueva entrada' : 'Editar entrada'}</div>${formHTML(cur)}
       <div class="btns" style="margin-top:14px"><button class="btn pri" id="ok">Guardar</button><button class="btn ghost" id="no">Cancelar</button></div></section>`
     : list.length ? list.map((e) => `<section class="panel sc"><div class="row"><div style="flex:1"><div style="font-weight:700;text-transform:capitalize">${fmtDate(e.date)}</div>

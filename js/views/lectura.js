@@ -15,7 +15,7 @@ export function render(root, ctx) {
   const draw = () => {
     const day = readDay(date), b = currentBook(), est = estimate(), reading = isReading();
     const others = R.books.filter((x) => !x.done && (!b || x.id !== b.id)), done = R.books.filter((x) => x.done);
-    root.innerHTML = `<div style="--acc:#22d3ee;--sc:#22d3ee">
+    root.innerHTML = `<div style="--acc:var(--mod-lectura);--sc:var(--mod-lectura)">
     <div class="head"><h1>Lectura</h1><span class="up">${new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' })}</span></div>
     <section class="panel sc">
       <div class="sess"><img src="${IMG.lectura}" alt="">

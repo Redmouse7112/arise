@@ -117,7 +117,7 @@ export function render(root, ctx) {
     if (!v || !q('#rf') || v.mode !== 'phases') return;
     const p = v.phase;
     ringSet(root, 1 - v.left / p.ms, T.fmt(v.left), p.round ? `Ronda ${p.round}/${p.rounds} · ${p.label}` : p.label);
-    const r = q('#rf'); if (r) r.style.stroke = p.label === 'Descanso' ? 'var(--ok)' : p.label === 'Preparate' ? '#22d3ee' : '#ef4444';
+    const r = q('#rf'); if (r) r.style.stroke = p.label === 'Descanso' ? 'var(--ok)' : p.label === 'Preparate' ? 'var(--info)' : 'var(--mod-spar)';
   }
 
   draw();

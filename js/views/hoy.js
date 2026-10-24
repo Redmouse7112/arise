@@ -34,7 +34,7 @@ export function render(root, ctx) {
     </div>
   </section>
 
-  ${exs.some((e) => e.id === 'spar') && lastWork() ? `<section class="panel sc" style="--sc:#ef4444"><div class="up">Para trabajar hoy</div><p style="margin:6px 0 0">${esc(lastWork())}</p></section>` : ''}
+  ${exs.some((e) => e.id === 'spar') && lastWork() ? `<section class="panel sc" style="--sc:var(--mod-spar)"><div class="up">Para trabajar hoy</div><p style="margin:6px 0 0">${esc(lastWork())}</p></section>` : ''}
 
   <div>${exs.map((e) => {
     const d = exDone(e.id, date);
