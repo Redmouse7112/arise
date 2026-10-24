@@ -1,6 +1,11 @@
 // Registro de cambios para quien usa la app. La entrada más nueva va primero.
 // Regla: en cada entrega, subir APP_VERSION (data.js) y sumar acá su entrada, en lenguaje simple.
 export const NOVEDADES = [
+  { v: '2.3.0', fecha: '2026-10-24', items: [
+    'Colores unificados: la app tiene ahora una paleta propia y ordenada.',
+    'Estado y Más usan el rojo brasa de la marca; cada módulo mantiene su color.',
+    'La barra de experiencia luce los colores del logo.',
+  ] },
   { v: '2.2.4', fecha: '2026-10-20', items: [
     'Mantenimiento: sin cambios visibles.',
   ] },
